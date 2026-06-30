@@ -49,7 +49,8 @@ function App() {
     setUser(null)
   }
 
-  if (publicPath === '/guia-materiales') return <MaterialGuideView publicMode />
+  if (publicPath === '/landing') return <PublicEntry onLogin={handleLogin} />
+  if (publicPath === '/guia-materiales' || publicPath === '/materiales') return <MaterialGuideView publicMode />
   if (booting) return <div className="boot-screen">Cargando sistema...</div>
   if (!accessToken) return <PublicEntry onLogin={handleLogin} />
 
