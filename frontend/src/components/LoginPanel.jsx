@@ -5,8 +5,8 @@ import { ShieldCheck } from 'lucide-react'
 import { API_URL, api, setAuthToken } from '../services/api'
 
 function LoginPanel({ onLogin }) {
-  const [username, setUsername] = useState('admin')
-  const [password, setPassword] = useState('Admin12345!')
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
