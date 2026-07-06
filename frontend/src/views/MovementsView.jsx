@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Edit3 } from 'lucide-react'
+import { Edit3, Trash2 } from 'lucide-react'
 
 import Header from '../components/Header'
 import MovementEditor from '../components/MovementEditor'
@@ -14,6 +14,7 @@ function MovementsView() {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [editingMovement, setEditingMovement] = useState(null)
+  const [deletingMovementId, setDeletingMovementId] = useState(null)
   const [form, setForm] = useState({
     product: '',
     movement_type: 'entrada',
@@ -70,6 +71,22 @@ function MovementsView() {
 
     const response = await api.get(`/movimientos-stock/?fecha=${form.movement_date}`)
     setMovements(response.data)
+  }
+
+  const deleteMovement = async (movement) => {
+    const confirmed = window.confirm(`Estas seguro de eliminar el movimiento de ${movement.product_name}? Esta accion actualizara el stock.`)
+    if (!confirmed) return
+
+    setDeletingMovementId(movement.id)
+    try {
+      await api.delete(`/movimientos-stock/${movement.id}/`)
+      await loadMovements()
+      await loadProducts()
+    } catch {
+      window.alert('No se pudo eliminar el movimiento. Vuelve a intentarlo.')
+    } finally {
+      setDeletingMovementId(null)
+    }
   }
 
   return (
@@ -149,9 +166,19 @@ function MovementsView() {
                     <td className={movement.movement_type === 'salida' ? 'negative-quantity' : 'positive-quantity'}>{movementQuantity(movement)}</td>
                     <td>{movement.movement_date}</td>
                     <td>
-                      <button className="icon-button" onClick={() => setEditingMovement(movement)} title="Editar movimiento">
-                        <Edit3 size={17} />
-                      </button>
+                      <div className="row-actions">
+                        <button className="icon-button" onClick={() => setEditingMovement(movement)} title="Editar movimiento">
+                          <Edit3 size={17} />
+                        </button>
+                        <button
+                          className="icon-button danger"
+                          disabled={deletingMovementId === movement.id}
+                          onClick={() => deleteMovement(movement)}
+                          title="Eliminar movimiento"
+                        >
+                          <Trash2 size={17} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Edit3, History, Save, X } from 'lucide-react'
+import { Edit3, History, Save, Trash2, X } from 'lucide-react'
 
 import MovementEditor from '../components/MovementEditor'
 import { api } from '../services/api'
@@ -30,6 +30,7 @@ function ProductDrawer({
   const [movements, setMovements] = useState([])
   const [loadingMovements, setLoadingMovements] = useState(false)
   const [editingMovement, setEditingMovement] = useState(null)
+  const [deletingMovementId, setDeletingMovementId] = useState(null)
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
@@ -103,6 +104,22 @@ function ProductDrawer({
       setError(detail || 'No se pudo guardar. Revisa que el backend este encendido y vuelve a intentar.')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const deleteMovement = async (movement) => {
+    const confirmed = window.confirm(`Estas seguro de eliminar el movimiento del ${movement.movement_date}? Esta accion actualizara el stock del producto.`)
+    if (!confirmed) return
+
+    setDeletingMovementId(movement.id)
+    try {
+      await api.delete(`/movimientos-stock/${movement.id}/`)
+      await loadProductMovements()
+      onInventoryChanged?.()
+    } catch {
+      window.alert('No se pudo eliminar el movimiento. Vuelve a intentarlo.')
+    } finally {
+      setDeletingMovementId(null)
     }
   }
 
@@ -206,9 +223,19 @@ function ProductDrawer({
                         <td>{movement.created_by_username || '-'}</td>
                         {!historyOnly && (
                           <td>
-                            <button className="icon-button" onClick={() => setEditingMovement(movement)} title="Editar movimiento">
-                              <Edit3 size={17} />
-                            </button>
+                            <div className="row-actions">
+                              <button className="icon-button" onClick={() => setEditingMovement(movement)} title="Editar movimiento">
+                                <Edit3 size={17} />
+                              </button>
+                              <button
+                                className="icon-button danger"
+                                disabled={deletingMovementId === movement.id}
+                                onClick={() => deleteMovement(movement)}
+                                title="Eliminar movimiento"
+                              >
+                                <Trash2 size={17} />
+                              </button>
+                            </div>
                           </td>
                         )}
                       </tr>

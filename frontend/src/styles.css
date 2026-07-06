@@ -941,6 +941,32 @@ textarea:focus {
   background: #eef3fb;
 }
 
+.icon-button:hover {
+  color: #1b64e8;
+  background: #e0eaff;
+}
+
+.icon-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.icon-button.danger {
+  color: #b42318;
+  background: #fff1f3;
+}
+
+.icon-button.danger:hover {
+  color: #ffffff;
+  background: #dc2626;
+}
+
+.row-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .main-panel {
   padding: 24px;
   display: grid;
