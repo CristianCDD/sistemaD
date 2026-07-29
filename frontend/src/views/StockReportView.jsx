@@ -92,7 +92,7 @@ function StockReportView() {
       <Header
         title="Reporte de Stock"
         subtitle={`${selectedProductName || 'Todos los productos'} - Periodo: ${periodLabel}`}
-        className="sticky-header"
+        className="sticky-header stock-report-header"
         actions={
           <div className="report-filters">
             <select value={selectedProduct} onChange={(event) => setSelectedProduct(event.target.value)}>

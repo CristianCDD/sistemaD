@@ -1010,6 +1010,25 @@ textarea:focus {
   gap: 12px;
 }
 
+.stock-report-header {
+  min-height: 86px;
+  align-items: center;
+  padding: 18px 22px;
+}
+
+.stock-report-header > div:first-child {
+  flex: 0 0 300px;
+}
+
+.stock-report-header h1 {
+  font-size: 26px;
+}
+
+.stock-report-header .header-actions {
+  flex: 1;
+  min-width: 0;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1096,16 +1115,16 @@ textarea:focus {
 }
 
 .report-filters {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) 150px 150px auto auto auto;
   align-items: center;
-  justify-content: flex-end;
   gap: 10px;
-  flex-wrap: wrap;
+  width: 100%;
 }
 
 .report-filters select,
 .report-filters input {
-  min-width: 160px;
+  min-width: 0;
 }
 
 .table-actions {
@@ -1890,6 +1909,14 @@ td small {
     align-items: stretch;
     flex-direction: column;
   }
+
+  .stock-report-header > div:first-child {
+    flex: initial;
+  }
+
+  .stock-report-header .report-filters {
+    grid-template-columns: minmax(0, 1fr) minmax(140px, 0.5fr) minmax(140px, 0.5fr);
+  }
 }
 
 @media (max-width: 640px) {
@@ -1964,6 +1991,10 @@ td small {
   .date-filter {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .stock-report-header .report-filters {
+    grid-template-columns: 1fr;
   }
 
   .drawer-backdrop {
