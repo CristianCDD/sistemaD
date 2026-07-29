@@ -15,6 +15,8 @@ function MovementsView() {
   const [saving, setSaving] = useState(false)
   const [editingMovement, setEditingMovement] = useState(null)
   const [deletingMovementId, setDeletingMovementId] = useState(null)
+  const [productQuery, setProductQuery] = useState('')
+  const [showProductResults, setShowProductResults] = useState(false)
   const [form, setForm] = useState({
     product: '',
     movement_type: 'entrada',
@@ -26,6 +28,19 @@ function MovementsView() {
     () => products.filter((product) => product.manages_stock),
     [products],
   )
+
+  const filteredProducts = useMemo(() => {
+    const value = productQuery.trim().toLowerCase()
+    if (!value) return stockProducts.slice(0, 12)
+
+    return stockProducts
+      .filter((product) => {
+        const name = product.name?.toLowerCase() || ''
+        const sku = product.sku?.toLowerCase() || ''
+        return name.includes(value) || sku.includes(value)
+      })
+      .slice(0, 12)
+  }, [productQuery, stockProducts])
 
   const loadMovements = async () => {
     setLoading(true)
@@ -40,7 +55,13 @@ function MovementsView() {
       .filter((product) => product.manages_stock)
       .sort((a, b) => a.name.localeCompare(b.name, 'es'))
     setProducts(ordered)
-    setForm((current) => ({ ...current, product: current.product || ordered[0]?.id || '' }))
+    setForm((current) => {
+      const selectedProduct = ordered.find((product) => String(product.id) === String(current.product)) || ordered[0]
+      if (selectedProduct && !productQuery) {
+        setProductQuery(`${selectedProduct.name} (${selectedProduct.sku || 'Sin codigo'})`)
+      }
+      return { ...current, product: selectedProduct?.id || '' }
+    })
   }
 
   useEffect(() => {
@@ -50,9 +71,19 @@ function MovementsView() {
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
+  const selectProduct = (product) => {
+    update('product', product.id)
+    setProductQuery(`${product.name} (${product.sku || 'Sin codigo'})`)
+    setShowProductResults(false)
+  }
+
   const submitMovement = async (event) => {
     event.preventDefault()
-    if (!form.product || !form.quantity) return
+    if (!form.product) {
+      window.alert('Selecciona un producto de la lista antes de guardar.')
+      return
+    }
+    if (!form.quantity) return
 
     setSaving(true)
     const created = await api.post('/movimientos-stock/', {
@@ -105,14 +136,35 @@ function MovementsView() {
       <section className="table-card">
         <h2>Registrar ingreso o salida</h2>
         <form className="movement-form" onSubmit={submitMovement}>
-          <label>
-            Producto
-            <select value={form.product} onChange={(event) => update('product', event.target.value)} required>
-              {stockProducts.map((product) => (
-                <option key={product.id} value={product.id}>{product.name} ({product.sku})</option>
-              ))}
-            </select>
-          </label>
+          <div className="movement-product-field">
+            <label htmlFor="movement-product-search">Producto</label>
+            <input
+              id="movement-product-search"
+              type="search"
+              autoComplete="off"
+              value={productQuery}
+              onChange={(event) => {
+                setProductQuery(event.target.value)
+                update('product', '')
+                setShowProductResults(true)
+              }}
+              onFocus={() => setShowProductResults(true)}
+              placeholder="Buscar producto o codigo"
+              required
+            />
+            {showProductResults && (
+              <div className="product-picker-results">
+                {filteredProducts.length === 0 ? (
+                  <span>Sin productos encontrados</span>
+                ) : filteredProducts.map((product) => (
+                  <button key={product.id} type="button" onClick={() => selectProduct(product)}>
+                    <strong>{product.name}</strong>
+                    <small>{product.sku || 'Sin codigo'}</small>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <label>
             Movimiento
             <select value={form.movement_type} onChange={(event) => update('movement_type', event.target.value)}>
