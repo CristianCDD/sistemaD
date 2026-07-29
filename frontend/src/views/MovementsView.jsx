@@ -31,7 +31,7 @@ function MovementsView() {
 
   const filteredProducts = useMemo(() => {
     const value = productQuery.trim().toLowerCase()
-    if (!value) return stockProducts.slice(0, 12)
+    if (!value) return stockProducts
 
     return stockProducts
       .filter((product) => {
@@ -39,7 +39,6 @@ function MovementsView() {
         const sku = product.sku?.toLowerCase() || ''
         return name.includes(value) || sku.includes(value)
       })
-      .slice(0, 12)
   }, [productQuery, stockProducts])
 
   const loadMovements = async () => {
