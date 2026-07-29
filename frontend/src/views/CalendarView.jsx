@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, ImagePlus, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ImagePlus, Trash2, X } from 'lucide-react'
 
 import Header from '../components/Header'
 import { api } from '../services/api'
@@ -38,6 +38,7 @@ function CalendarView() {
   const [loading, setLoading] = useState(true)
   const [listLoading, setListLoading] = useState(false)
   const [uploadingList, setUploadingList] = useState(false)
+  const [deletingListId, setDeletingListId] = useState(null)
 
   const load = async () => {
     setLoading(true)
@@ -79,6 +80,24 @@ function CalendarView() {
       window.alert('No se pudo subir la lista. Vuelve a intentarlo.')
     } finally {
       setUploadingList(false)
+    }
+  }
+
+  const deleteListImage = async (item) => {
+    const confirmed = window.confirm(`Estas seguro de eliminar la lista del ${item.movement_date}?`)
+    if (!confirmed) return
+
+    setDeletingListId(item.id)
+    try {
+      await api.delete(`/listas-calendario/${item.id}/`)
+      setListImages((current) => current.filter((image) => image.id !== item.id))
+      if (previewImage?.id === item.id) {
+        setPreviewImage(null)
+      }
+    } catch {
+      window.alert('No se pudo eliminar la lista. Vuelve a intentarlo.')
+    } finally {
+      setDeletingListId(null)
     }
   }
 
@@ -168,6 +187,38 @@ function CalendarView() {
               <input type="file" accept="image/*" onChange={uploadListImage} disabled={uploadingList} />
             </label>
           </div>
+
+          <div className="daily-list-section">
+            <h3>Listas del dia</h3>
+            {listLoading ? (
+              <div className="empty-state compact">Cargando listas...</div>
+            ) : listImages.length === 0 ? (
+              <div className="empty-state compact">
+                <strong>Sin listas adjuntas</strong>
+                <span>Agrega una foto de la lista fisica para este dia.</span>
+              </div>
+            ) : (
+              <div className="daily-list-grid">
+                {listImages.map((item) => (
+                  <article className="daily-list-card" key={item.id}>
+                    <button className="daily-list-preview" onClick={() => setPreviewImage(item)}>
+                      <img src={item.image_url} alt={`Lista ${item.movement_date}`} />
+                      <span>Ver lista</span>
+                    </button>
+                    <button
+                      className="icon-button danger daily-list-delete"
+                      onClick={() => deleteListImage(item)}
+                      disabled={deletingListId === item.id}
+                      title="Eliminar lista"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+
           {loading ? (
             <div className="empty-state">Cargando movimientos...</div>
           ) : selectedMovements.length === 0 ? (
@@ -186,27 +237,6 @@ function CalendarView() {
               ))}
             </div>
           )}
-
-          <div className="daily-list-section">
-            <h3>Listas del dia</h3>
-            {listLoading ? (
-              <div className="empty-state compact">Cargando listas...</div>
-            ) : listImages.length === 0 ? (
-              <div className="empty-state compact">
-                <strong>Sin listas adjuntas</strong>
-                <span>Agrega una foto de la lista fisica para este dia.</span>
-              </div>
-            ) : (
-              <div className="daily-list-grid">
-                {listImages.map((item) => (
-                  <button className="daily-list-card" key={item.id} onClick={() => setPreviewImage(item)}>
-                    <img src={item.image_url} alt={`Lista ${item.movement_date}`} />
-                    <span>Ver lista</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </aside>
       </div>
       {previewImage && (
@@ -219,6 +249,9 @@ function CalendarView() {
               <span>Lista</span>
               <strong>{previewImage.movement_date}</strong>
             </div>
+            <button className="icon-button danger list-modal-delete" onClick={() => deleteListImage(previewImage)} title="Eliminar lista">
+              <Trash2 size={18} />
+            </button>
             <img src={previewImage.image_url} alt={`Lista ${previewImage.movement_date}`} />
           </div>
         </div>
