@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Edit3, Plus, RefreshCcw, Trash2 } from 'lucide-react'
+import { Edit3, FileSpreadsheet, Plus, RefreshCcw, Trash2 } from 'lucide-react'
 
 import Header from '../components/Header'
 import SearchBox from '../components/SearchBox'
@@ -60,6 +60,42 @@ function ProductsView() {
     }
   }
 
+  const exportProducts = () => {
+    const rows = products
+      .slice()
+      .sort((a, b) => {
+        const aExhausted = Number(a.stock || 0) <= 0 || a.stock_status === 'agotado'
+        const bExhausted = Number(b.stock || 0) <= 0 || b.stock_status === 'agotado'
+        if (aExhausted !== bExhausted) return aExhausted ? 1 : -1
+        return a.name.localeCompare(b.name, 'es')
+      })
+      .map((product) => [
+        product.name,
+        product.sku || '',
+        product.stock ?? 0,
+      ])
+
+    const escapeCell = (value) => {
+      const text = String(value ?? '')
+      return `"${text.replaceAll('"', '""')}"`
+    }
+
+    const csv = [
+      ['Producto', 'Codigo', 'Stock'],
+      ...rows,
+    ].map((row) => row.map(escapeCell).join(';')).join('\n')
+
+    const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `productos-stock-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <>
       <Header
@@ -71,6 +107,9 @@ function ProductsView() {
         <div className="table-toolbar">
           <strong>{filtered.length} registros</strong>
           <div className="table-actions">
+            <button className="soft-button" onClick={exportProducts} disabled={!products.length}>
+              <FileSpreadsheet size={16} /> Excel
+            </button>
             <button className="primary-button compact" onClick={() => setCreating(true)}><Plus size={16} /> Nuevo producto</button>
             <button className="soft-button" onClick={load}><RefreshCcw size={16} /> Actualizar</button>
           </div>
