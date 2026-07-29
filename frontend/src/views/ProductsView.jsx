@@ -107,7 +107,7 @@ function ProductsView() {
         <div className="table-toolbar">
           <strong>{filtered.length} registros</strong>
           <div className="table-actions">
-            <button className="soft-button" onClick={exportProducts} disabled={!products.length}>
+            <button className="soft-button excel-button" onClick={exportProducts} disabled={!products.length}>
               <FileSpreadsheet size={16} /> Excel
             </button>
             <button className="primary-button compact" onClick={() => setCreating(true)}><Plus size={16} /> Nuevo producto</button>

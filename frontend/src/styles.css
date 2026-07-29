@@ -862,6 +862,16 @@ textarea:focus {
   background: #edf4ff;
 }
 
+.excel-button {
+  color: #047857;
+  background: #dcfce7;
+}
+
+.excel-button:hover {
+  color: #ffffff;
+  background: #16a34a;
+}
+
 .app-shell {
   min-height: 100vh;
   display: grid;
