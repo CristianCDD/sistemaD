@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ImagePlus, X } from 'lucide-react'
 
 import Header from '../components/Header'
 import { api } from '../services/api'
@@ -33,7 +33,11 @@ function CalendarView() {
   const [month, setMonth] = useState(today.slice(0, 7))
   const [selectedDate, setSelectedDate] = useState(today)
   const [movements, setMovements] = useState([])
+  const [listImages, setListImages] = useState([])
+  const [previewImage, setPreviewImage] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [listLoading, setListLoading] = useState(false)
+  const [uploadingList, setUploadingList] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -43,9 +47,40 @@ function CalendarView() {
     setLoading(false)
   }
 
+  const loadListImages = async () => {
+    setListLoading(true)
+    const response = await api.get(`/listas-calendario/?fecha=${selectedDate}`)
+    setListImages(response.data)
+    setListLoading(false)
+  }
+
   useEffect(() => {
     load()
   }, [month])
+
+  useEffect(() => {
+    loadListImages()
+  }, [selectedDate])
+
+  const uploadListImage = async (event) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('movement_date', selectedDate)
+    formData.append('image', file)
+
+    setUploadingList(true)
+    try {
+      const response = await api.post('/listas-calendario/', formData)
+      setListImages((current) => [response.data, ...current])
+    } catch {
+      window.alert('No se pudo subir la lista. Vuelve a intentarlo.')
+    } finally {
+      setUploadingList(false)
+    }
+  }
 
   const movementsByDate = useMemo(() => {
     return movements.reduce((acc, movement) => {
@@ -126,7 +161,13 @@ function CalendarView() {
         </section>
 
         <aside className="table-card calendar-detail">
-          <h2>{selectedDate}</h2>
+          <div className="calendar-detail-head">
+            <h2>{selectedDate}</h2>
+            <label className="soft-button compact list-upload-button">
+              <ImagePlus size={16} /> {uploadingList ? 'Subiendo...' : 'Agregar lista'}
+              <input type="file" accept="image/*" onChange={uploadListImage} disabled={uploadingList} />
+            </label>
+          </div>
           {loading ? (
             <div className="empty-state">Cargando movimientos...</div>
           ) : selectedMovements.length === 0 ? (
@@ -145,8 +186,43 @@ function CalendarView() {
               ))}
             </div>
           )}
+
+          <div className="daily-list-section">
+            <h3>Listas del dia</h3>
+            {listLoading ? (
+              <div className="empty-state compact">Cargando listas...</div>
+            ) : listImages.length === 0 ? (
+              <div className="empty-state compact">
+                <strong>Sin listas adjuntas</strong>
+                <span>Agrega una foto de la lista fisica para este dia.</span>
+              </div>
+            ) : (
+              <div className="daily-list-grid">
+                {listImages.map((item) => (
+                  <button className="daily-list-card" key={item.id} onClick={() => setPreviewImage(item)}>
+                    <img src={item.image_url} alt={`Lista ${item.movement_date}`} />
+                    <span>Ver lista</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </aside>
       </div>
+      {previewImage && (
+        <div className="list-image-modal" role="dialog" aria-modal="true">
+          <button className="material-modal-close" onClick={() => setPreviewImage(null)} title="Cerrar">
+            <X size={24} />
+          </button>
+          <div className="list-image-modal-content">
+            <div>
+              <span>Lista</span>
+              <strong>{previewImage.movement_date}</strong>
+            </div>
+            <img src={previewImage.image_url} alt={`Lista ${previewImage.movement_date}`} />
+          </div>
+        </div>
+      )}
     </>
   )
 }

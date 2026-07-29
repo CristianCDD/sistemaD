@@ -35,4 +35,21 @@ class StockMovement(models.Model):
     def __str__(self):
         return f'{self.get_movement_type_display()} {self.quantity} - {self.product.name}'
 
-# Create your models here.
+
+class DailyListImage(models.Model):
+    movement_date = models.DateField()
+    image = models.ImageField(upload_to='lista/')
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        related_name='daily_list_images',
+        blank=True,
+        null=True,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-movement_date', '-id']
+
+    def __str__(self):
+        return f'Lista {self.movement_date}'

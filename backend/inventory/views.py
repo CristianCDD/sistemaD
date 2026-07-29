@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 
 from catalog.models import Product
 from catalog.serializers import ProductSerializer
-from .models import StockMovement
-from .serializers import StockMovementSerializer
+from .models import DailyListImage, StockMovement
+from .serializers import DailyListImageSerializer, StockMovementSerializer
 from .services import stock_expression
 
 
@@ -32,6 +32,29 @@ class StockMovementViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(product_id=product)
         if movement_type:
             queryset = queryset.filter(movement_type=movement_type)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+
+class DailyListImageViewSet(viewsets.ModelViewSet):
+    queryset = DailyListImage.objects.select_related('created_by').all()
+    serializer_class = DailyListImageSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        movement_date = self.request.query_params.get('fecha') or self.request.query_params.get('movement_date')
+        date_from = self.request.query_params.get('desde') or self.request.query_params.get('date_from')
+        date_to = self.request.query_params.get('hasta') or self.request.query_params.get('date_to')
+
+        if movement_date:
+            queryset = queryset.filter(movement_date=movement_date)
+        if date_from:
+            queryset = queryset.filter(movement_date__gte=date_from)
+        if date_to:
+            queryset = queryset.filter(movement_date__lte=date_to)
 
         return queryset
 

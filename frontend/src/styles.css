@@ -1808,8 +1808,30 @@ td small {
   min-height: 360px;
 }
 
-.calendar-detail h2 {
+.calendar-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin-bottom: 14px;
+}
+
+.calendar-detail h2,
+.daily-list-section h3 {
+  margin: 0;
+}
+
+.list-upload-button {
+  position: relative;
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+.list-upload-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .movement-list {
@@ -1828,6 +1850,97 @@ td small {
 
 .movement-item .badge {
   width: fit-content;
+}
+
+.daily-list-section {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #edf1f7;
+}
+
+.daily-list-section h3 {
+  font-size: 16px;
+}
+
+.daily-list-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.daily-list-card {
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid #e1e8f3;
+  border-radius: 8px;
+  background: #fff;
+  text-align: left;
+}
+
+.daily-list-card img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: block;
+  object-fit: cover;
+  background: #f3f6fb;
+}
+
+.daily-list-card span {
+  display: block;
+  padding: 9px 10px;
+  color: #1b64e8;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.list-image-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(8px);
+}
+
+.list-image-modal-content {
+  width: min(860px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: hidden;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+}
+
+.list-image-modal-content div {
+  padding: 18px 22px;
+  border-bottom: 1px solid #edf1f7;
+}
+
+.list-image-modal-content span {
+  display: block;
+  color: #667085;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.list-image-modal-content strong {
+  display: block;
+  margin-top: 4px;
+  color: #0f172a;
+  font-size: 24px;
+}
+
+.list-image-modal-content img {
+  width: 100%;
+  max-height: calc(100vh - 150px);
+  display: block;
+  object-fit: contain;
+  background: #f3f6fb;
 }
 
 .quick-grid {

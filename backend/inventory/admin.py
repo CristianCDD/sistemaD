@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import StockMovement
+from .models import DailyListImage, StockMovement
 
 
 @admin.register(StockMovement)
@@ -9,4 +9,8 @@ class StockMovementAdmin(admin.ModelAdmin):
     list_filter = ['movement_type', 'movement_date']
     search_fields = ['product__name', 'product__sku', 'note']
 
-# Register your models here.
+
+@admin.register(DailyListImage)
+class DailyListImageAdmin(admin.ModelAdmin):
+    list_display = ['movement_date', 'created_by', 'created_at']
+    list_filter = ['movement_date']
