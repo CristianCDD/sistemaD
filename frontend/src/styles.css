@@ -1527,6 +1527,28 @@ td small {
   height: 18px;
 }
 
+.image-purpose-grid,
+.image-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.image-purpose-grid label {
+  padding: 12px;
+  border: 1px solid #d8e2f2;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.image-purpose-grid small {
+  display: block;
+  margin: 6px 0 10px;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .product-image-preview {
   display: grid;
   grid-template-columns: 110px minmax(0, 1fr);

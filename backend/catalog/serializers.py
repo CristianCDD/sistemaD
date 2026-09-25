@@ -15,6 +15,8 @@ class ProductSerializer(serializers.ModelSerializer):
     stock = serializers.SerializerMethodField()
     stock_status = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
+    landing_image_url = serializers.SerializerMethodField()
+    material_image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -27,6 +29,10 @@ class ProductSerializer(serializers.ModelSerializer):
             'category',
             'image',
             'image_url',
+            'landing_image',
+            'landing_image_url',
+            'material_image',
+            'material_image_url',
             'sale_price',
             'cost',
             'minimum_stock',
@@ -50,12 +56,21 @@ class ProductSerializer(serializers.ModelSerializer):
         return 'normal'
 
     def get_image_url(self, obj):
+        return self.get_file_url(obj.image)
+
+    def get_landing_image_url(self, obj):
+        return self.get_file_url(obj.landing_image)
+
+    def get_material_image_url(self, obj):
+        return self.get_file_url(obj.material_image)
+
+    def get_file_url(self, file):
         request = self.context.get('request')
-        if not obj.image:
+        if not file:
             return None
         if request:
-            return request.build_absolute_uri(obj.image.url)
-        return obj.image.url
+            return request.build_absolute_uri(file.url)
+        return file.url
 
 
 class PublicProductSerializer(ProductSerializer):
@@ -70,10 +85,14 @@ class PublicProductSerializer(ProductSerializer):
             'product_type',
             'category',
             'image_url',
+            'landing_image_url',
             'sale_price',
             'show_price_on_landing',
             'display_price',
         ]
+
+    def get_image_url(self, obj):
+        return self.get_file_url(obj.landing_image)
 
     def get_display_price(self, obj):
         if obj.show_price_on_landing and obj.sale_price is not None:
@@ -90,11 +109,11 @@ class PublicMaterialGuideSerializer(serializers.ModelSerializer):
 
     def get_image_url(self, obj):
         request = self.context.get('request')
-        if not obj.image:
+        if not obj.material_image:
             return None
         if request:
-            return request.build_absolute_uri(obj.image.url)
-        return obj.image.url
+            return request.build_absolute_uri(obj.material_image.url)
+        return obj.material_image.url
 
 
 class ProductSummarySerializer(serializers.ModelSerializer):

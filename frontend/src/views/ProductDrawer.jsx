@@ -22,8 +22,10 @@ function ProductDrawer({
     cost: product?.cost || '',
     description: product?.description || '',
   })
-  const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(product?.image_url || '')
+  const [landingImageFile, setLandingImageFile] = useState(null)
+  const [landingImagePreview, setLandingImagePreview] = useState(product?.landing_image_url || '')
+  const [materialImageFile, setMaterialImageFile] = useState(null)
+  const [materialImagePreview, setMaterialImagePreview] = useState(product?.material_image_url || '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState(startingTab)
@@ -34,10 +36,17 @@ function ProductDrawer({
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
-  const updateImage = (file) => {
-    setImageFile(file)
+  const updateLandingImage = (file) => {
+    setLandingImageFile(file)
     if (file) {
-      setImagePreview(URL.createObjectURL(file))
+      setLandingImagePreview(URL.createObjectURL(file))
+    }
+  }
+
+  const updateMaterialImage = (file) => {
+    setMaterialImageFile(file)
+    if (file) {
+      setMaterialImagePreview(URL.createObjectURL(file))
     }
   }
 
@@ -87,8 +96,11 @@ function ProductDrawer({
     payload.append('minimum_stock', '0')
     payload.append('manages_stock', 'true')
     payload.append('is_active', 'true')
-    if (imageFile) {
-      payload.append('image', imageFile)
+    if (landingImageFile) {
+      payload.append('landing_image', landingImageFile)
+    }
+    if (materialImageFile) {
+      payload.append('material_image', materialImageFile)
     }
 
     try {
@@ -157,16 +169,32 @@ function ProductDrawer({
             </div>
             <h3>Detalles</h3>
             <label>Descripcion<textarea value={form.description} onChange={(event) => update('description', event.target.value)} /></label>
-            <label>
-              Imagen del producto
-              <input type="file" accept="image/*" onChange={(event) => updateImage(event.target.files?.[0] || null)} />
-            </label>
-            {imagePreview && (
-              <div className="product-image-preview">
-                <img src={imagePreview} alt={form.name || 'Imagen del producto'} />
-                <span>{imageFile ? 'Nueva imagen seleccionada' : 'Imagen actual'}</span>
-              </div>
-            )}
+            <div className="image-purpose-grid">
+              <label>
+                Imagen para landing
+                <small>Foto presentable para clientes en la pagina publica.</small>
+                <input type="file" accept="image/*" onChange={(event) => updateLandingImage(event.target.files?.[0] || null)} />
+              </label>
+              <label>
+                Imagen para guia de materiales
+                <small>Foto rapida para trabajadores al cargar o identificar material.</small>
+                <input type="file" accept="image/*" onChange={(event) => updateMaterialImage(event.target.files?.[0] || null)} />
+              </label>
+            </div>
+            <div className="image-preview-grid">
+              {landingImagePreview && (
+                <div className="product-image-preview">
+                  <img src={landingImagePreview} alt={form.name || 'Imagen para landing'} />
+                  <span>{landingImageFile ? 'Nueva imagen para landing' : 'Imagen actual de landing'}</span>
+                </div>
+              )}
+              {materialImagePreview && (
+                <div className="product-image-preview">
+                  <img src={materialImagePreview} alt={form.name || 'Imagen para guia de materiales'} />
+                  <span>{materialImageFile ? 'Nueva imagen para materiales' : 'Imagen actual de materiales'}</span>
+                </div>
+              )}
+            </div>
             {error && <div className="form-error">{error}</div>}
             <button className="primary-button" disabled={saving}><Save size={16} /> {saving ? 'Guardando...' : isNew ? 'Crear producto' : 'Guardar cambios'}</button>
           </form>

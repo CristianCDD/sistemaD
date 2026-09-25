@@ -39,6 +39,8 @@ class Product(models.Model):
         null=True,
     )
     image = models.ImageField(upload_to='productos/', blank=True, null=True)
+    landing_image = models.ImageField(upload_to='productos/landing/', blank=True, null=True)
+    material_image = models.ImageField(upload_to='productos/materiales/', blank=True, null=True)
     sale_price = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     cost = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     minimum_stock = models.PositiveIntegerField(default=0)
