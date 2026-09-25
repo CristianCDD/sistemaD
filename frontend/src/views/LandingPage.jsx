@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, BadgeCheck, Building2, MapPin, MessageCircle, PackageCheck, ShoppingBag, Store, Truck, X } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Building2, ChevronLeft, ChevronRight, MapPin, MessageCircle, PackageCheck, ShoppingBag, Store, Truck, X } from 'lucide-react'
 
 import { API_URL } from '../services/api'
 
@@ -24,6 +24,16 @@ function LandingPage() {
   }, [])
 
   const showcaseProducts = publicProducts.filter((product) => productCover(product)).slice(0, 4)
+  const selectedImages = selectedProduct?.images || []
+  const selectedImage = selectedImages[selectedProduct?.imageIndex || 0]
+
+  const moveSelectedImage = (direction) => {
+    setSelectedProduct((current) => {
+      if (!current?.images?.length) return current
+      const nextIndex = (current.imageIndex + direction + current.images.length) % current.images.length
+      return { ...current, imageIndex: nextIndex }
+    })
+  }
 
   return (
     <main className="landing-page">
@@ -147,6 +157,7 @@ function LandingPage() {
                 onClick={() => setSelectedProduct({
                   images: productImages(product),
                   title: product.name,
+                  imageIndex: 0,
                 })}
               >
                 {productCover(product) ? (
@@ -209,11 +220,22 @@ function LandingPage() {
               <span>Producto</span>
               <strong>{selectedProduct.title}</strong>
             </div>
-            {selectedProduct.images?.length ? (
-              <div className={selectedProduct.images.length > 1 ? 'landing-image-gallery' : ''}>
-                {selectedProduct.images.map((image, index) => (
-                  <img src={image} alt={`${selectedProduct.title} ${index + 1}`} key={image} />
-                ))}
+            {selectedImage ? (
+              <div className="image-carousel">
+                {selectedImages.length > 1 && (
+                  <button className="carousel-arrow carousel-prev" type="button" onClick={() => moveSelectedImage(-1)} aria-label="Imagen anterior">
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+                <img src={selectedImage} alt={`${selectedProduct.title} ${(selectedProduct.imageIndex || 0) + 1}`} />
+                {selectedImages.length > 1 && (
+                  <button className="carousel-arrow carousel-next" type="button" onClick={() => moveSelectedImage(1)} aria-label="Imagen siguiente">
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+                {selectedImages.length > 1 && (
+                  <span className="carousel-count">{(selectedProduct.imageIndex || 0) + 1} / {selectedImages.length}</span>
+                )}
               </div>
             ) : (
               <div className="landing-product-empty large">Sin imagen</div>

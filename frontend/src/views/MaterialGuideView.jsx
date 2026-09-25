@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ImageOff, RefreshCcw, X } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, ImageOff, RefreshCcw, X } from 'lucide-react'
 
 import Header from '../components/Header'
 import SearchBox from '../components/SearchBox'
@@ -12,6 +12,7 @@ function MaterialGuideView({ publicMode = false }) {
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
 
   const load = async () => {
     setLoading(true)
@@ -32,6 +33,24 @@ function MaterialGuideView({ publicMode = false }) {
       || (product.sku || '').toLowerCase().includes(value)
     ))
   }, [products, query])
+
+  const openProduct = (product) => {
+    setSelectedImageIndex(0)
+    setSelectedProduct(product)
+  }
+
+  const closeProduct = () => {
+    setSelectedProduct(null)
+    setSelectedImageIndex(0)
+  }
+
+  const selectedImages = selectedProduct ? materialImages(selectedProduct) : []
+  const selectedImage = selectedImages[selectedImageIndex]
+
+  const moveSelectedImage = (direction) => {
+    if (!selectedImages.length) return
+    setSelectedImageIndex((current) => (current + direction + selectedImages.length) % selectedImages.length)
+  }
 
   const content = (
     <>
@@ -57,7 +76,7 @@ function MaterialGuideView({ publicMode = false }) {
         ) : (
           <div className="material-guide-grid">
             {filtered.map((product) => (
-              <button className="material-card" key={product.id} onClick={() => setSelectedProduct(product)} type="button">
+              <button className="material-card" key={product.id} onClick={() => openProduct(product)} type="button">
                 <div className="material-image">
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.name} />
@@ -78,9 +97,9 @@ function MaterialGuideView({ publicMode = false }) {
         )}
       </section>
       {selectedProduct && (
-        <div className="material-modal-backdrop" onClick={() => setSelectedProduct(null)}>
+        <div className="material-modal-backdrop" onClick={closeProduct}>
           <section className="material-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="icon-button material-modal-close" onClick={() => setSelectedProduct(null)} type="button">
+            <button className="icon-button material-modal-close" onClick={closeProduct} type="button">
               <X size={18} />
             </button>
             <div className="material-modal-info">
@@ -94,11 +113,22 @@ function MaterialGuideView({ publicMode = false }) {
               </div>
             </div>
             <div className="material-modal-image">
-              {materialImages(selectedProduct).length ? (
-                <div className={materialImages(selectedProduct).length > 1 ? 'material-modal-gallery' : ''}>
-                  {materialImages(selectedProduct).map((image, index) => (
-                    <img src={image} alt={`${selectedProduct.name} ${index + 1}`} key={image} />
-                  ))}
+              {selectedImage ? (
+                <div className="image-carousel">
+                  {selectedImages.length > 1 && (
+                    <button className="carousel-arrow carousel-prev" type="button" onClick={() => moveSelectedImage(-1)} aria-label="Imagen anterior">
+                      <ChevronLeft size={24} />
+                    </button>
+                  )}
+                  <img src={selectedImage} alt={`${selectedProduct.name} ${selectedImageIndex + 1}`} />
+                  {selectedImages.length > 1 && (
+                    <button className="carousel-arrow carousel-next" type="button" onClick={() => moveSelectedImage(1)} aria-label="Imagen siguiente">
+                      <ChevronRight size={24} />
+                    </button>
+                  )}
+                  {selectedImages.length > 1 && (
+                    <span className="carousel-count">{selectedImageIndex + 1} / {selectedImages.length}</span>
+                  )}
                 </div>
               ) : (
                 <div className="material-image-empty">
