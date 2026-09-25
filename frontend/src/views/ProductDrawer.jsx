@@ -22,8 +22,9 @@ function ProductDrawer({
     cost: product?.cost || '',
     description: product?.description || '',
   })
+  const existingCatalogImages = product?.catalog_image_urls?.length ? product.catalog_image_urls : product?.landing_image_url ? [product.landing_image_url] : []
   const [catalogImageFiles, setCatalogImageFiles] = useState([])
-  const [catalogImagePreviews, setCatalogImagePreviews] = useState(product?.catalog_image_urls?.length ? product.catalog_image_urls : product?.landing_image_url ? [product.landing_image_url] : [])
+  const [catalogImagePreviews, setCatalogImagePreviews] = useState(existingCatalogImages)
   const [materialImageFile, setMaterialImageFile] = useState(null)
   const [materialImagePreview, setMaterialImagePreview] = useState(product?.material_image_url || '')
   const [catalogInputKey, setCatalogInputKey] = useState(0)
@@ -40,10 +41,26 @@ function ProductDrawer({
 
   const updateCatalogImages = (files) => {
     const selectedFiles = Array.from(files || [])
-    setCatalogImageFiles(selectedFiles)
-    if (selectedFiles.length) {
-      setCatalogImagePreviews(selectedFiles.map((file) => URL.createObjectURL(file)))
-    }
+    if (!selectedFiles.length) return
+
+    setCatalogImageFiles((current) => {
+      const selectedKeys = new Set(current.map((file) => `${file.name}-${file.size}-${file.lastModified}`))
+      const newFiles = selectedFiles.filter((file) => {
+        const key = `${file.name}-${file.size}-${file.lastModified}`
+        if (selectedKeys.has(key)) return false
+        selectedKeys.add(key)
+        return true
+      })
+
+      if (newFiles.length) {
+        setCatalogImagePreviews((currentPreviews) => [
+          ...currentPreviews,
+          ...newFiles.map((file) => URL.createObjectURL(file)),
+        ])
+      }
+
+      return [...current, ...newFiles]
+    })
   }
 
   const updateMaterialImage = (file) => {
@@ -196,7 +213,11 @@ function ProductDrawer({
                       <img src={preview} alt={`${form.name || 'Imagen para catalogo'} ${index + 1}`} key={preview} />
                     ))}
                   </div>
-                  <span>{catalogImageFiles.length ? `${catalogImageFiles.length} nueva(s) imagen(es) para catalogo` : `${catalogImagePreviews.length} imagen(es) actuales de catalogo`}</span>
+                  <span>
+                    {catalogImageFiles.length
+                      ? `${catalogImageFiles.length} nueva(s) imagen(es) para catalogo${existingCatalogImages.length ? ` + ${existingCatalogImages.length} actual(es)` : ''}`
+                      : `${catalogImagePreviews.length} imagen(es) actuales de catalogo`}
+                  </span>
                 </div>
               )}
               {materialImagePreview && (
