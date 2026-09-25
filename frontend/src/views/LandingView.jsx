@@ -58,13 +58,13 @@ function LandingView() {
   return (
     <>
       <Header
-        title="Landing page"
+        title="Catalogo"
         subtitle="Edita la informacion publica y que productos se muestran al visitante."
         actions={<button className="soft-button" onClick={load}><RefreshCcw size={16} /> Actualizar</button>}
       />
 
       {loading || !config ? (
-        <div className="table-card">Cargando landing...</div>
+        <div className="table-card">Cargando catalogo...</div>
       ) : (
         <>
           <section className="table-card">
@@ -95,13 +95,13 @@ function LandingView() {
                 <input value={config.address || ''} onChange={(event) => updateConfig('address', event.target.value)} />
               </label>
               <button className="primary-button landing-save" disabled={saving}>
-                <Save size={16} /> {saving ? 'Guardando...' : 'Guardar landing'}
+                <Save size={16} /> {saving ? 'Guardando...' : 'Guardar catalogo'}
               </button>
             </form>
           </section>
 
           <section className="table-card">
-            <h2>Productos visibles en landing</h2>
+            <h2>Productos visibles en catalogo</h2>
             <div className="table-wrap">
               <table>
                 <thead>

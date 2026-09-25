@@ -22,10 +22,12 @@ function ProductDrawer({
     cost: product?.cost || '',
     description: product?.description || '',
   })
-  const [landingImageFile, setLandingImageFile] = useState(null)
-  const [landingImagePreview, setLandingImagePreview] = useState(product?.landing_image_url || '')
+  const [catalogImageFiles, setCatalogImageFiles] = useState([])
+  const [catalogImagePreviews, setCatalogImagePreviews] = useState(product?.catalog_image_urls?.length ? product.catalog_image_urls : product?.landing_image_url ? [product.landing_image_url] : [])
   const [materialImageFile, setMaterialImageFile] = useState(null)
   const [materialImagePreview, setMaterialImagePreview] = useState(product?.material_image_url || '')
+  const [catalogInputKey, setCatalogInputKey] = useState(0)
+  const [materialInputKey, setMaterialInputKey] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState(startingTab)
@@ -36,10 +38,11 @@ function ProductDrawer({
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
-  const updateLandingImage = (file) => {
-    setLandingImageFile(file)
-    if (file) {
-      setLandingImagePreview(URL.createObjectURL(file))
+  const updateCatalogImages = (files) => {
+    const selectedFiles = Array.from(files || [])
+    setCatalogImageFiles(selectedFiles)
+    if (selectedFiles.length) {
+      setCatalogImagePreviews(selectedFiles.map((file) => URL.createObjectURL(file)))
     }
   }
 
@@ -96,9 +99,7 @@ function ProductDrawer({
     payload.append('minimum_stock', '0')
     payload.append('manages_stock', 'true')
     payload.append('is_active', 'true')
-    if (landingImageFile) {
-      payload.append('landing_image', landingImageFile)
-    }
+    catalogImageFiles.forEach((file) => payload.append('catalog_images', file))
     if (materialImageFile) {
       payload.append('material_image', materialImageFile)
     }
@@ -110,6 +111,12 @@ function ProductDrawer({
       } else {
         response = await api.patch(`/productos/${product.id}/`, payload)
       }
+      setCatalogImageFiles([])
+      setCatalogImagePreviews(response.data.catalog_image_urls?.length ? response.data.catalog_image_urls : response.data.landing_image_url ? [response.data.landing_image_url] : [])
+      setMaterialImageFile(null)
+      setMaterialImagePreview(response.data.material_image_url || '')
+      setCatalogInputKey((value) => value + 1)
+      setMaterialInputKey((value) => value + 1)
       onSaved(response.data)
     } catch (requestError) {
       const detail = requestError.response?.data?.detail
@@ -171,21 +178,25 @@ function ProductDrawer({
             <label>Descripcion<textarea value={form.description} onChange={(event) => update('description', event.target.value)} /></label>
             <div className="image-purpose-grid">
               <label>
-                Imagen para landing
-                <small>Foto presentable para clientes en la pagina publica.</small>
-                <input type="file" accept="image/*" onChange={(event) => updateLandingImage(event.target.files?.[0] || null)} />
+                Imagenes para catalogo
+                <small>Fotos presentables para clientes en la pagina publica. Puedes seleccionar mas de una.</small>
+                <input key={catalogInputKey} type="file" accept="image/*" multiple onChange={(event) => updateCatalogImages(event.target.files)} />
               </label>
               <label>
                 Imagen para guia de materiales
                 <small>Foto rapida para trabajadores al cargar o identificar material.</small>
-                <input type="file" accept="image/*" onChange={(event) => updateMaterialImage(event.target.files?.[0] || null)} />
+                <input key={materialInputKey} type="file" accept="image/*" onChange={(event) => updateMaterialImage(event.target.files?.[0] || null)} />
               </label>
             </div>
             <div className="image-preview-grid">
-              {landingImagePreview && (
-                <div className="product-image-preview">
-                  <img src={landingImagePreview} alt={form.name || 'Imagen para landing'} />
-                  <span>{landingImageFile ? 'Nueva imagen para landing' : 'Imagen actual de landing'}</span>
+              {catalogImagePreviews.length > 0 && (
+                <div className="product-image-preview product-image-preview-list">
+                  <div className="product-preview-strip">
+                    {catalogImagePreviews.map((preview, index) => (
+                      <img src={preview} alt={`${form.name || 'Imagen para catalogo'} ${index + 1}`} key={preview} />
+                    ))}
+                  </div>
+                  <span>{catalogImageFiles.length ? `${catalogImageFiles.length} nueva(s) imagen(es) para catalogo` : `${catalogImagePreviews.length} imagen(es) actuales de catalogo`}</span>
                 </div>
               )}
               {materialImagePreview && (

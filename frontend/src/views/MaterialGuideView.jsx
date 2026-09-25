@@ -111,7 +111,7 @@ function MaterialGuideView({ publicMode = false }) {
 
   return (
     <main className="public-guide-page">
-      <a className="soft-button public-guide-back" href="/landing"><ArrowLeft size={16} /> Volver a la landing</a>
+      <a className="soft-button public-guide-back" href="/landing"><ArrowLeft size={16} /> Volver al catalogo</a>
       {content}
     </main>
   )

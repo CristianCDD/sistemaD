@@ -8,6 +8,10 @@ const storeImageUrl = 'https://res.cloudinary.com/dmbvogx69/image/upload/v178265
 
 const whatsappNumbers = ['999999999', '987654321']
 
+const productImages = (product) => product.catalog_image_urls?.length ? product.catalog_image_urls : product.image_url ? [product.image_url] : []
+
+const productCover = (product) => productImages(product)[0] || ''
+
 function LandingPage() {
   const [publicProducts, setPublicProducts] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -19,7 +23,7 @@ function LandingPage() {
       .catch(() => setPublicProducts([]))
   }, [])
 
-  const showcaseProducts = publicProducts.filter((product) => product.image_url).slice(0, 4)
+  const showcaseProducts = publicProducts.filter((product) => productCover(product)).slice(0, 4)
 
   return (
     <main className="landing-page">
@@ -67,7 +71,7 @@ function LandingPage() {
               {showcaseProducts.map((product, index) => (
               <img
                 className={`showcase-image showcase-${index + 1}`}
-                src={product.image_url}
+                src={productCover(product)}
                 alt={product.name}
                 key={product.id}
               />
@@ -141,12 +145,12 @@ function LandingPage() {
                 key={product.id}
                 type="button"
                 onClick={() => setSelectedProduct({
-                  image: product.image_url,
+                  images: productImages(product),
                   title: product.name,
                 })}
               >
-                {product.image_url ? (
-                  <img src={product.image_url} alt={product.name} />
+                {productCover(product) ? (
+                  <img src={productCover(product)} alt={product.name} />
                 ) : (
                   <div className="landing-product-empty">Sin imagen</div>
                 )}
@@ -205,8 +209,12 @@ function LandingPage() {
               <span>Producto</span>
               <strong>{selectedProduct.title}</strong>
             </div>
-            {selectedProduct.image ? (
-              <img src={selectedProduct.image} alt={selectedProduct.title} />
+            {selectedProduct.images?.length ? (
+              <div className={selectedProduct.images.length > 1 ? 'landing-image-gallery' : ''}>
+                {selectedProduct.images.map((image, index) => (
+                  <img src={image} alt={`${selectedProduct.title} ${index + 1}`} key={image} />
+                ))}
+              </div>
             ) : (
               <div className="landing-product-empty large">Sin imagen</div>
             )}

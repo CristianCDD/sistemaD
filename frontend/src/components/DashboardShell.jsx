@@ -21,7 +21,7 @@ function DashboardShell({ children, activeView, setActiveView, user, logout }) {
     { id: 'stock', label: 'Reporte de stock', icon: BarChart3 },
     { id: 'calendario', label: 'Calendario', icon: CalendarDays },
     { id: 'guia', label: 'Guia de materiales', icon: Images },
-    { id: 'landing', label: 'Landing page', icon: Globe2 },
+    { id: 'landing', label: 'Catalogo', icon: Globe2 },
     { id: 'config', label: 'Configuracion', icon: Settings },
   ]
 

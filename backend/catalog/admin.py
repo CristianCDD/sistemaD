@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Product
+from .models import Category, Product, ProductCatalogImage
 
 
 @admin.register(Category)
@@ -33,5 +33,11 @@ class ProductAdmin(admin.ModelAdmin):
         'show_price_on_landing',
         'is_active',
     ]
+
+
+@admin.register(ProductCatalogImage)
+class ProductCatalogImageAdmin(admin.ModelAdmin):
+    list_display = ['product', 'created_at']
+    search_fields = ['product__name', 'product__sku']
 
 # Register your models here.

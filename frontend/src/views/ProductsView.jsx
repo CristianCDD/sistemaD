@@ -165,7 +165,7 @@ function ProductsView() {
           onClose={() => setEditing(null)}
           onSaved={(savedProduct) => {
             upsertProduct(savedProduct)
-            setEditing(null)
+            setEditing(savedProduct)
           }}
           onInventoryChanged={load}
         />

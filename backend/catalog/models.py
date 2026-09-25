@@ -57,4 +57,16 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+
+class ProductCatalogImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='catalog_images')
+    image = models.ImageField(upload_to='productos/catalogo/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f'Imagen de catalogo - {self.product.name}'
+
 # Create your models here.

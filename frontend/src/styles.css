@@ -708,6 +708,18 @@ button {
   background: #eef2f7;
 }
 
+.landing-image-gallery {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  background: #eef2f7;
+}
+
+.landing-image-gallery img {
+  border-radius: 8px;
+  background: #fff;
+}
+
 .landing-location {
   width: min(1180px, calc(100% - 32px));
   margin: 72px auto 0;
@@ -1568,6 +1580,20 @@ td small {
   object-fit: cover;
   border-radius: 8px;
   background: #e5e7eb;
+}
+
+.product-image-preview-list {
+  align-items: start;
+}
+
+.product-preview-strip {
+  display: grid;
+  grid-template-columns: repeat(2, 52px);
+  gap: 6px;
+}
+
+.product-preview-strip img {
+  width: 52px;
 }
 
 .material-guide-grid {

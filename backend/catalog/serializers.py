@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from inventory.services import get_product_stock
 
-from .models import Category, Product
+from .models import Category, Product, ProductCatalogImage
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -16,6 +16,7 @@ class ProductSerializer(serializers.ModelSerializer):
     stock_status = serializers.SerializerMethodField()
     image_url = serializers.SerializerMethodField()
     landing_image_url = serializers.SerializerMethodField()
+    catalog_image_urls = serializers.SerializerMethodField()
     material_image_url = serializers.SerializerMethodField()
 
     class Meta:
@@ -31,6 +32,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'image_url',
             'landing_image',
             'landing_image_url',
+            'catalog_image_urls',
             'material_image',
             'material_image_url',
             'sale_price',
@@ -61,6 +63,12 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_landing_image_url(self, obj):
         return self.get_file_url(obj.landing_image)
 
+    def get_catalog_image_urls(self, obj):
+        urls = [self.get_file_url(item.image) for item in obj.catalog_images.all()]
+        if obj.landing_image:
+            urls.insert(0, self.get_file_url(obj.landing_image))
+        return [url for url in urls if url]
+
     def get_material_image_url(self, obj):
         return self.get_file_url(obj.material_image)
 
@@ -71,6 +79,23 @@ class ProductSerializer(serializers.ModelSerializer):
         if request:
             return request.build_absolute_uri(file.url)
         return file.url
+
+    def create(self, validated_data):
+        product = super().create(validated_data)
+        self.create_catalog_images(product)
+        return product
+
+    def update(self, instance, validated_data):
+        product = super().update(instance, validated_data)
+        self.create_catalog_images(product)
+        return product
+
+    def create_catalog_images(self, product):
+        request = self.context.get('request')
+        if not request:
+            return
+        for image in request.FILES.getlist('catalog_images'):
+            ProductCatalogImage.objects.create(product=product, image=image)
 
 
 class PublicProductSerializer(ProductSerializer):
@@ -86,12 +111,16 @@ class PublicProductSerializer(ProductSerializer):
             'category',
             'image_url',
             'landing_image_url',
+            'catalog_image_urls',
             'sale_price',
             'show_price_on_landing',
             'display_price',
         ]
 
     def get_image_url(self, obj):
+        image = obj.catalog_images.first()
+        if image:
+            return self.get_file_url(image.image)
         return self.get_file_url(obj.landing_image)
 
     def get_display_price(self, obj):

@@ -24,7 +24,7 @@ class PublicLandingView(APIView):
     def get(self, request):
         config = LandingConfig.objects.filter(is_active=True).order_by('-id').first()
         images = LandingImage.objects.filter(is_active=True)
-        products = Product.objects.filter(is_active=True, show_on_landing=True).select_related('category')
+        products = Product.objects.filter(is_active=True, show_on_landing=True).select_related('category').prefetch_related('catalog_images')
 
         return Response(
             {
