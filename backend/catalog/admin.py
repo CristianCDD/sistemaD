@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Product, ProductCatalogImage
+from .models import Category, Product, ProductCatalogImage, ProductMaterialImage
 
 
 @admin.register(Category)
@@ -37,6 +37,12 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(ProductCatalogImage)
 class ProductCatalogImageAdmin(admin.ModelAdmin):
+    list_display = ['product', 'created_at']
+    search_fields = ['product__name', 'product__sku']
+
+
+@admin.register(ProductMaterialImage)
+class ProductMaterialImageAdmin(admin.ModelAdmin):
     list_display = ['product', 'created_at']
     search_fields = ['product__name', 'product__sku']
 

@@ -5,6 +5,8 @@ import Header from '../components/Header'
 import SearchBox from '../components/SearchBox'
 import { api } from '../services/api'
 
+const materialImages = (product) => product.material_image_urls?.length ? product.material_image_urls : product.image_url ? [product.image_url] : []
+
 function MaterialGuideView({ publicMode = false }) {
   const [products, setProducts] = useState([])
   const [query, setQuery] = useState('')
@@ -92,8 +94,12 @@ function MaterialGuideView({ publicMode = false }) {
               </div>
             </div>
             <div className="material-modal-image">
-              {selectedProduct.image_url ? (
-                <img src={selectedProduct.image_url} alt={selectedProduct.name} />
+              {materialImages(selectedProduct).length ? (
+                <div className={materialImages(selectedProduct).length > 1 ? 'material-modal-gallery' : ''}>
+                  {materialImages(selectedProduct).map((image, index) => (
+                    <img src={image} alt={`${selectedProduct.name} ${index + 1}`} key={image} />
+                  ))}
+                </div>
               ) : (
                 <div className="material-image-empty">
                   <ImageOff size={30} />

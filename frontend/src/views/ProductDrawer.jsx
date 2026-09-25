@@ -5,6 +5,22 @@ import MovementEditor from '../components/MovementEditor'
 import { api } from '../services/api'
 import { movementLabel, movementQuantity } from '../utils/format'
 
+const toImageItems = (items, fallbackUrl = '', legacyType = '') => {
+  if (items?.length) {
+    return items.map((item, index) => ({
+      id: item.id,
+      url: item.url,
+      key: item.id ? `saved-${item.id}` : `legacy-${index}-${item.url}`,
+      legacyType: item.id ? '' : legacyType,
+      isNew: false,
+    }))
+  }
+  if (fallbackUrl) {
+    return [{ id: null, url: fallbackUrl, key: `legacy-${fallbackUrl}`, legacyType, isNew: false }]
+  }
+  return []
+}
+
 function ProductDrawer({
   product = null,
   onClose,
@@ -22,11 +38,12 @@ function ProductDrawer({
     cost: product?.cost || '',
     description: product?.description || '',
   })
-  const existingCatalogImages = product?.catalog_image_urls?.length ? product.catalog_image_urls : product?.landing_image_url ? [product.landing_image_url] : []
-  const [catalogImageFiles, setCatalogImageFiles] = useState([])
-  const [catalogImagePreviews, setCatalogImagePreviews] = useState(existingCatalogImages)
-  const [materialImageFile, setMaterialImageFile] = useState(null)
-  const [materialImagePreview, setMaterialImagePreview] = useState(product?.material_image_url || '')
+  const [catalogImages, setCatalogImages] = useState(toImageItems(product?.catalog_images_data, product?.landing_image_url, 'catalog'))
+  const [materialImages, setMaterialImages] = useState(toImageItems(product?.material_images_data, product?.material_image_url, 'material'))
+  const [deletedCatalogImageIds, setDeletedCatalogImageIds] = useState([])
+  const [deletedMaterialImageIds, setDeletedMaterialImageIds] = useState([])
+  const [clearCatalogLegacy, setClearCatalogLegacy] = useState(false)
+  const [clearMaterialLegacy, setClearMaterialLegacy] = useState(false)
   const [catalogInputKey, setCatalogInputKey] = useState(0)
   const [materialInputKey, setMaterialInputKey] = useState(0)
   const [saving, setSaving] = useState(false)
@@ -39,12 +56,12 @@ function ProductDrawer({
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
 
-  const updateCatalogImages = (files) => {
+  const appendImages = (files, setImages) => {
     const selectedFiles = Array.from(files || [])
     if (!selectedFiles.length) return
 
-    setCatalogImageFiles((current) => {
-      const selectedKeys = new Set(current.map((file) => `${file.name}-${file.size}-${file.lastModified}`))
+    setImages((current) => {
+      const selectedKeys = new Set(current.map((item) => item.file ? `${item.file.name}-${item.file.size}-${item.file.lastModified}` : item.key))
       const newFiles = selectedFiles.filter((file) => {
         const key = `${file.name}-${file.size}-${file.lastModified}`
         if (selectedKeys.has(key)) return false
@@ -52,22 +69,29 @@ function ProductDrawer({
         return true
       })
 
-      if (newFiles.length) {
-        setCatalogImagePreviews((currentPreviews) => [
-          ...currentPreviews,
-          ...newFiles.map((file) => URL.createObjectURL(file)),
-        ])
-      }
-
-      return [...current, ...newFiles]
+      return [
+        ...current,
+        ...newFiles.map((file) => ({
+          id: null,
+          file,
+          url: URL.createObjectURL(file),
+          key: `new-${file.name}-${file.size}-${file.lastModified}`,
+          isNew: true,
+        })),
+      ]
     })
   }
 
-  const updateMaterialImage = (file) => {
-    setMaterialImageFile(file)
-    if (file) {
-      setMaterialImagePreview(URL.createObjectURL(file))
-    }
+  const removeImage = (key, setImages, setDeletedIds, setClearLegacy) => {
+    setImages((current) => {
+      const target = current.find((item) => item.key === key)
+      if (target?.id) {
+        setDeletedIds((ids) => [...ids, target.id])
+      } else if (target?.legacyType) {
+        setClearLegacy(true)
+      }
+      return current.filter((item) => item.key !== key)
+    })
   }
 
   const movementTotals = useMemo(() => {
@@ -116,10 +140,12 @@ function ProductDrawer({
     payload.append('minimum_stock', '0')
     payload.append('manages_stock', 'true')
     payload.append('is_active', 'true')
-    catalogImageFiles.forEach((file) => payload.append('catalog_images', file))
-    if (materialImageFile) {
-      payload.append('material_image', materialImageFile)
-    }
+    catalogImages.filter((item) => item.isNew).forEach((item) => payload.append('catalog_images', item.file))
+    materialImages.filter((item) => item.isNew).forEach((item) => payload.append('material_images', item.file))
+    deletedCatalogImageIds.forEach((id) => payload.append('delete_catalog_image_ids', id))
+    deletedMaterialImageIds.forEach((id) => payload.append('delete_material_image_ids', id))
+    if (clearCatalogLegacy) payload.append('clear_landing_image', 'true')
+    if (clearMaterialLegacy) payload.append('clear_material_image', 'true')
 
     try {
       let response
@@ -128,10 +154,12 @@ function ProductDrawer({
       } else {
         response = await api.patch(`/productos/${product.id}/`, payload)
       }
-      setCatalogImageFiles([])
-      setCatalogImagePreviews(response.data.catalog_image_urls?.length ? response.data.catalog_image_urls : response.data.landing_image_url ? [response.data.landing_image_url] : [])
-      setMaterialImageFile(null)
-      setMaterialImagePreview(response.data.material_image_url || '')
+      setCatalogImages(toImageItems(response.data.catalog_images_data, response.data.landing_image_url, 'catalog'))
+      setMaterialImages(toImageItems(response.data.material_images_data, response.data.material_image_url, 'material'))
+      setDeletedCatalogImageIds([])
+      setDeletedMaterialImageIds([])
+      setClearCatalogLegacy(false)
+      setClearMaterialLegacy(false)
       setCatalogInputKey((value) => value + 1)
       setMaterialInputKey((value) => value + 1)
       onSaved(response.data)
@@ -197,33 +225,61 @@ function ProductDrawer({
               <label>
                 Imagenes para catalogo
                 <small>Fotos presentables para clientes en la pagina publica. Puedes seleccionar mas de una.</small>
-                <input key={catalogInputKey} type="file" accept="image/*" multiple onChange={(event) => updateCatalogImages(event.target.files)} />
+                <input key={catalogInputKey} type="file" accept="image/*" multiple onChange={(event) => appendImages(event.target.files, setCatalogImages)} />
               </label>
               <label>
-                Imagen para guia de materiales
-                <small>Foto rapida para trabajadores al cargar o identificar material.</small>
-                <input key={materialInputKey} type="file" accept="image/*" onChange={(event) => updateMaterialImage(event.target.files?.[0] || null)} />
+                Imagenes para guia de materiales
+                <small>Fotos rapidas para trabajadores al cargar o identificar material. Puedes seleccionar mas de una.</small>
+                <input key={materialInputKey} type="file" accept="image/*" multiple onChange={(event) => appendImages(event.target.files, setMaterialImages)} />
               </label>
             </div>
             <div className="image-preview-grid">
-              {catalogImagePreviews.length > 0 && (
+              {catalogImages.length > 0 && (
                 <div className="product-image-preview product-image-preview-list">
                   <div className="product-preview-strip">
-                    {catalogImagePreviews.map((preview, index) => (
-                      <img src={preview} alt={`${form.name || 'Imagen para catalogo'} ${index + 1}`} key={preview} />
+                    {catalogImages.map((item, index) => (
+                      <div className="product-preview-tile" key={item.key}>
+                        <img src={item.url} alt={`${form.name || 'Imagen para catalogo'} ${index + 1}`} />
+                        <button
+                          className="preview-delete"
+                          onClick={() => removeImage(item.key, setCatalogImages, setDeletedCatalogImageIds, setClearCatalogLegacy)}
+                          title="Quitar imagen"
+                          type="button"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     ))}
                   </div>
                   <span>
-                    {catalogImageFiles.length
-                      ? `${catalogImageFiles.length} nueva(s) imagen(es) para catalogo${existingCatalogImages.length ? ` + ${existingCatalogImages.length} actual(es)` : ''}`
-                      : `${catalogImagePreviews.length} imagen(es) actuales de catalogo`}
+                    {catalogImages.filter((item) => item.isNew).length
+                      ? `${catalogImages.filter((item) => item.isNew).length} nueva(s) imagen(es) para catalogo`
+                      : `${catalogImages.length} imagen(es) actuales de catalogo`}
                   </span>
                 </div>
               )}
-              {materialImagePreview && (
-                <div className="product-image-preview">
-                  <img src={materialImagePreview} alt={form.name || 'Imagen para guia de materiales'} />
-                  <span>{materialImageFile ? 'Nueva imagen para materiales' : 'Imagen actual de materiales'}</span>
+              {materialImages.length > 0 && (
+                <div className="product-image-preview product-image-preview-list">
+                  <div className="product-preview-strip">
+                    {materialImages.map((item, index) => (
+                      <div className="product-preview-tile" key={item.key}>
+                        <img src={item.url} alt={`${form.name || 'Imagen para guia de materiales'} ${index + 1}`} />
+                        <button
+                          className="preview-delete"
+                          onClick={() => removeImage(item.key, setMaterialImages, setDeletedMaterialImageIds, setClearMaterialLegacy)}
+                          title="Quitar imagen"
+                          type="button"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <span>
+                    {materialImages.filter((item) => item.isNew).length
+                      ? `${materialImages.filter((item) => item.isNew).length} nueva(s) imagen(es) para materiales`
+                      : `${materialImages.length} imagen(es) actuales de materiales`}
+                  </span>
                 </div>
               )}
             </div>

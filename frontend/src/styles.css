@@ -1596,6 +1596,34 @@ td small {
   width: 52px;
 }
 
+.product-preview-tile {
+  position: relative;
+}
+
+.product-preview-tile img {
+  display: block;
+}
+
+.preview-delete {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  color: #dc2626;
+  background: #fff1f2;
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.18);
+}
+
+.preview-delete:hover {
+  color: #fff;
+  background: #dc2626;
+}
+
 .material-guide-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1720,6 +1748,22 @@ td small {
   display: block;
   object-fit: contain;
   padding: 14px;
+}
+
+.material-modal-gallery {
+  height: 100%;
+  display: grid;
+  gap: 12px;
+  overflow: auto;
+  padding: 14px;
+}
+
+.material-modal-gallery img {
+  height: auto;
+  max-height: 520px;
+  padding: 0;
+  border-radius: 8px;
+  background: #fff;
 }
 
 .material-modal-info {

@@ -18,7 +18,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.select_related('category').prefetch_related('catalog_images').all()
+    queryset = Product.objects.select_related('category').prefetch_related('catalog_images', 'material_images').all()
     serializer_class = ProductSerializer
     filterset_fields = ['category', 'product_type', 'is_active', 'show_on_landing']
     search_fields = ['name', 'sku', 'description']
@@ -46,7 +46,7 @@ class PublicProductViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class PublicMaterialGuideViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Product.objects.filter(is_active=True).order_by('name')
+    queryset = Product.objects.filter(is_active=True).prefetch_related('material_images').order_by('name')
     serializer_class = PublicMaterialGuideSerializer
     permission_classes = [permissions.AllowAny]
 
