@@ -616,20 +616,29 @@ button {
   cursor: pointer;
 }
 
-.landing-product-card img {
-  width: 100%;
+.landing-product-frame {
+  position: relative;
   aspect-ratio: 16 / 9;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  overflow: hidden;
+}
+
+.landing-product-frame img {
+  width: 100%;
+  height: 100%;
   display: block;
   object-fit: contain;
   background: #fff;
   transition: transform 240ms ease;
 }
 
-.landing-product-card:hover img {
+.landing-product-card:hover .landing-product-frame img {
   transform: scale(1.04);
 }
 
-.landing-product-card div {
+.landing-product-info {
   display: grid;
   gap: 6px;
   padding: 16px;
@@ -638,6 +647,49 @@ button {
 .landing-product-card span {
   color: #64748b;
   font-size: 13px;
+}
+
+.card-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.2);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.card-carousel-arrow:hover {
+  color: #fff;
+  background: #1b64e8;
+}
+
+.card-carousel-prev {
+  left: 12px;
+}
+
+.card-carousel-next {
+  right: 12px;
+}
+
+.card-carousel-count {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  z-index: 2;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: #0f172a !important;
+  background: rgba(255, 255, 255, 0.94);
+  font-size: 12px !important;
+  font-weight: 900;
 }
 
 .landing-product-empty {

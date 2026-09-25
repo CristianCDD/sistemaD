@@ -15,6 +15,7 @@ const productCover = (product) => productImages(product)[0] || ''
 function LandingPage() {
   const [publicProducts, setPublicProducts] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const [cardImageIndexes, setCardImageIndexes] = useState({})
 
   useEffect(() => {
     fetch(`${API_URL}/public/landing/`)
@@ -26,6 +27,31 @@ function LandingPage() {
   const showcaseProducts = publicProducts.filter((product) => productCover(product)).slice(0, 4)
   const selectedImages = selectedProduct?.images || []
   const selectedImage = selectedImages[selectedProduct?.imageIndex || 0]
+
+  const cardImageIndex = (product) => {
+    const images = productImages(product)
+    if (!images.length) return 0
+    return (cardImageIndexes[product.id] || 0) % images.length
+  }
+
+  const openProduct = (product) => {
+    setSelectedProduct({
+      images: productImages(product),
+      title: product.name,
+      imageIndex: cardImageIndex(product),
+    })
+  }
+
+  const moveCardImage = (event, product, direction) => {
+    event.preventDefault()
+    event.stopPropagation()
+    const images = productImages(product)
+    if (images.length <= 1) return
+    setCardImageIndexes((current) => ({
+      ...current,
+      [product.id]: ((current[product.id] || 0) + direction + images.length) % images.length,
+    }))
+  }
 
   const moveSelectedImage = (direction) => {
     setSelectedProduct((current) => {
@@ -149,28 +175,50 @@ function LandingPage() {
             <p>Una muestra de los productos disponibles en tienda. Consulta disponibilidad para compras al menor o mayor.</p>
           </div>
           <div className="landing-gallery">
-            {publicProducts.map((product) => (
-              <button
+            {publicProducts.map((product) => {
+              const images = productImages(product)
+              const currentIndex = cardImageIndex(product)
+              const currentImage = images[currentIndex]
+
+              return (
+              <article
                 className="landing-product-card"
                 key={product.id}
-                type="button"
-                onClick={() => setSelectedProduct({
-                  images: productImages(product),
-                  title: product.name,
-                  imageIndex: 0,
-                })}
+                role="button"
+                tabIndex={0}
+                onClick={() => openProduct(product)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    openProduct(product)
+                  }
+                }}
               >
-                {productCover(product) ? (
-                  <img src={productCover(product)} alt={product.name} />
+                {currentImage ? (
+                  <div className="landing-product-frame">
+                    <img src={currentImage} alt={`${product.name} ${currentIndex + 1}`} />
+                    {images.length > 1 && (
+                      <>
+                        <button className="card-carousel-arrow card-carousel-prev" type="button" onClick={(event) => moveCardImage(event, product, -1)} aria-label="Imagen anterior">
+                          <ChevronLeft size={20} />
+                        </button>
+                        <button className="card-carousel-arrow card-carousel-next" type="button" onClick={(event) => moveCardImage(event, product, 1)} aria-label="Imagen siguiente">
+                          <ChevronRight size={20} />
+                        </button>
+                        <span className="card-carousel-count">{currentIndex + 1} / {images.length}</span>
+                      </>
+                    )}
+                  </div>
                 ) : (
                   <div className="landing-product-empty">Sin imagen</div>
                 )}
-                <div>
+                <div className="landing-product-info">
                   <strong>{product.name}</strong>
                   <span>Consultar por WhatsApp</span>
                 </div>
-              </button>
-            ))}
+              </article>
+              )
+            })}
           </div>
         </section>
       )}
