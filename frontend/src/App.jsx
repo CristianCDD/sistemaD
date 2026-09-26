@@ -50,7 +50,7 @@ function App() {
     setUser(null)
   }
 
-  if (publicPath === '/landing') return <PublicEntry onLogin={handleLogin} />
+  if (publicPath === '/' || publicPath === '/landing') return <PublicEntry onLogin={handleLogin} />
   if (publicPath === '/catalogo') return <CatalogPage />
   if (publicPath === '/guia-materiales' || publicPath === '/materiales') return <MaterialGuideView publicMode />
   if (booting) return <div className="boot-screen">Cargando sistema...</div>

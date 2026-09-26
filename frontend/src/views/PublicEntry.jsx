@@ -11,7 +11,7 @@ function PublicEntry({ onLogin }) {
   const [landing, setLanding] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  const isLandingPath = window.location.pathname === '/landing'
+  const isLandingPath = window.location.pathname === '/' || window.location.pathname === '/landing'
 
   useEffect(() => {
     if (isLandingPath) {
@@ -35,7 +35,7 @@ function PublicEntry({ onLogin }) {
         <nav className="public-nav">
           <BrandMark />
           <div className="public-nav-links">
-            <a href="/landing">Inicio publico</a>
+            <a href="/">Inicio publico</a>
             <a href="/catalogo">Catalogo publico</a>
             <a href="#login">Ingresar</a>
           </div>

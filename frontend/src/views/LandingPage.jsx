@@ -28,7 +28,7 @@ function LandingPage() {
     <main className="landing-page">
       <section className="landing-hero">
         <nav className="landing-nav">
-          <a className="landing-brand" href="/landing" aria-label="Distribuidor Damian">
+          <a className="landing-brand" href="/" aria-label="Distribuidor Damian">
             <img src={logoUrl} alt="Distribuidor Damian" />
           </a>
           <div className="landing-nav-links">

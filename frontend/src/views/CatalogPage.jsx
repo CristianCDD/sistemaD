@@ -56,7 +56,7 @@ function CatalogPage() {
   return (
     <main className="landing-page catalog-page">
       <section className="catalog-hero">
-        <a className="soft-button public-guide-back" href="/landing"><ArrowLeft size={16} /> Volver al inicio</a>
+        <a className="soft-button public-guide-back" href="/"><ArrowLeft size={16} /> Volver al inicio</a>
         <span className="landing-kicker">Catalogo visual</span>
         <h1>Materiales para tus trabajos publicitarios</h1>
         <p>Revisa las imagenes del catalogo y escribenos por WhatsApp para consultar disponibilidad al por menor o mayor.</p>
