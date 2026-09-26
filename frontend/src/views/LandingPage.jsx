@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, BadgeCheck, BookOpen, Building2, MapPin, MessageCircle, PackageCheck, ShoppingBag, Store, Truck } from 'lucide-react'
 
 import { API_URL } from '../services/api'
+import logo from '../assets/landing/logo-nav.png'
 
-const logoUrl = 'https://res.cloudinary.com/dmbvogx69/image/upload/v1782541769/logo_fyguf1.png'
 const storeImageUrl = 'https://res.cloudinary.com/dmbvogx69/image/upload/v1782657157/tienda_a03kjv.png'
 
 const whatsappNumbers = ['999999999', '987654321']
@@ -29,7 +29,7 @@ function LandingPage() {
       <section className="landing-hero">
         <nav className="landing-nav">
           <a className="landing-brand" href="/" aria-label="Distribuidor Damian">
-            <img src={logoUrl} alt="Distribuidor Damian" />
+            <img src={logo} alt="Distribuidor Damian" />
           </a>
           <div className="landing-nav-links">
             <a href="#tienda">Tienda</a>
