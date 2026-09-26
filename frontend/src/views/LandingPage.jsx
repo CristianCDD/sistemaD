@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, BadgeCheck, Building2, ChevronLeft, ChevronRight, MapPin, MessageCircle, PackageCheck, ShoppingBag, Store, Truck, X } from 'lucide-react'
+import { ArrowRight, BadgeCheck, BookOpen, Building2, MapPin, MessageCircle, PackageCheck, ShoppingBag, Store, Truck } from 'lucide-react'
 
 import { API_URL } from '../services/api'
 
@@ -14,8 +14,6 @@ const productCover = (product) => productImages(product)[0] || ''
 
 function LandingPage() {
   const [publicProducts, setPublicProducts] = useState([])
-  const [selectedProduct, setSelectedProduct] = useState(null)
-  const [cardImageIndexes, setCardImageIndexes] = useState({})
 
   useEffect(() => {
     fetch(`${API_URL}/public/landing/`)
@@ -25,41 +23,6 @@ function LandingPage() {
   }, [])
 
   const showcaseProducts = publicProducts.filter((product) => productCover(product)).slice(0, 4)
-  const selectedImages = selectedProduct?.images || []
-  const selectedImage = selectedImages[selectedProduct?.imageIndex || 0]
-
-  const cardImageIndex = (product) => {
-    const images = productImages(product)
-    if (!images.length) return 0
-    return (cardImageIndexes[product.id] || 0) % images.length
-  }
-
-  const openProduct = (product) => {
-    setSelectedProduct({
-      images: productImages(product),
-      title: product.name,
-      imageIndex: cardImageIndex(product),
-    })
-  }
-
-  const moveCardImage = (event, product, direction) => {
-    event.preventDefault()
-    event.stopPropagation()
-    const images = productImages(product)
-    if (images.length <= 1) return
-    setCardImageIndexes((current) => ({
-      ...current,
-      [product.id]: ((current[product.id] || 0) + direction + images.length) % images.length,
-    }))
-  }
-
-  const moveSelectedImage = (direction) => {
-    setSelectedProduct((current) => {
-      if (!current?.images?.length) return current
-      const nextIndex = (current.imageIndex + direction + current.images.length) % current.images.length
-      return { ...current, imageIndex: nextIndex }
-    })
-  }
 
   return (
     <main className="landing-page">
@@ -70,7 +33,7 @@ function LandingPage() {
           </a>
           <div className="landing-nav-links">
             <a href="#tienda">Tienda</a>
-            {publicProducts.length > 0 && <a href="#productos">Productos</a>}
+            {publicProducts.length > 0 && <a href="/catalogo">Catalogo</a>}
             <a href="/guia-materiales">Guia de materiales</a>
             <a href="#ubicacion">Ubicacion</a>
             <a href="#contacto">WhatsApp</a>
@@ -92,8 +55,8 @@ function LandingPage() {
                 <MapPin size={18} /> Como llegar
               </a>
               {publicProducts.length > 0 && (
-                <a className="landing-secondary" href="#productos">
-                  Ver productos <ArrowRight size={18} />
+                <a className="landing-secondary" href="/catalogo">
+                  Ver catalogo <ArrowRight size={18} />
                 </a>
               )}
               <a className="landing-secondary" href="/guia-materiales">
@@ -167,61 +130,25 @@ function LandingPage() {
         </div>
       </section>
 
-      {publicProducts.length > 0 && (
-        <section className="landing-section" id="productos">
-          <div className="landing-section-head">
-            <span>Catalogo visual</span>
-            <h2>Materiales para tus trabajos publicitarios</h2>
-            <p>Una muestra de los productos disponibles en tienda. Consulta disponibilidad para compras al menor o mayor.</p>
+      <section className="landing-catalog-callout" id="productos">
+        <div className="catalog-callout-copy">
+          <span className="landing-kicker">Catalogo separado</span>
+          <h2>Mira los productos con sus fotos en un espacio aparte</h2>
+          <p>
+            Dejamos el inicio limpio para presentar la tienda. El catalogo completo ahora vive en su propio link, ideal para compartirlo con clientes por WhatsApp.
+          </p>
+          <a className="landing-primary dark" href="/catalogo">
+            <BookOpen size={18} /> Abrir catalogo
+          </a>
+        </div>
+        {showcaseProducts.length > 0 && (
+          <div className="catalog-callout-preview" aria-label="Vista previa del catalogo">
+            {showcaseProducts.slice(0, 3).map((product) => (
+              <img src={productCover(product)} alt={product.name} key={product.id} />
+            ))}
           </div>
-          <div className="landing-gallery">
-            {publicProducts.map((product) => {
-              const images = productImages(product)
-              const currentIndex = cardImageIndex(product)
-              const currentImage = images[currentIndex]
-
-              return (
-              <article
-                className="landing-product-card"
-                key={product.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => openProduct(product)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault()
-                    openProduct(product)
-                  }
-                }}
-              >
-                {currentImage ? (
-                  <div className="landing-product-frame">
-                    <img src={currentImage} alt={`${product.name} ${currentIndex + 1}`} />
-                    {images.length > 1 && (
-                      <>
-                        <button className="card-carousel-arrow card-carousel-prev" type="button" onClick={(event) => moveCardImage(event, product, -1)} aria-label="Imagen anterior">
-                          <ChevronLeft size={20} />
-                        </button>
-                        <button className="card-carousel-arrow card-carousel-next" type="button" onClick={(event) => moveCardImage(event, product, 1)} aria-label="Imagen siguiente">
-                          <ChevronRight size={20} />
-                        </button>
-                        <span className="card-carousel-count">{currentIndex + 1} / {images.length}</span>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <div className="landing-product-empty">Sin imagen</div>
-                )}
-                <div className="landing-product-info">
-                  <strong>{product.name}</strong>
-                  <span>Consultar por WhatsApp</span>
-                </div>
-              </article>
-              )
-            })}
-          </div>
-        </section>
-      )}
+        )}
+      </section>
 
       <section className="landing-location" id="ubicacion">
         <div className="location-copy">
@@ -257,40 +184,6 @@ function LandingPage() {
           ))}
         </div>
       </section>
-
-      {selectedProduct && (
-        <div className="landing-image-modal" role="dialog" aria-modal="true">
-          <div className="landing-image-viewer">
-            <button className="icon-button landing-image-close" type="button" onClick={() => setSelectedProduct(null)} aria-label="Cerrar imagen">
-              <X size={22} />
-            </button>
-            <div className="landing-image-title">
-              <span>Producto</span>
-              <strong>{selectedProduct.title}</strong>
-            </div>
-            {selectedImage ? (
-              <div className="image-carousel">
-                {selectedImages.length > 1 && (
-                  <button className="carousel-arrow carousel-prev" type="button" onClick={() => moveSelectedImage(-1)} aria-label="Imagen anterior">
-                    <ChevronLeft size={24} />
-                  </button>
-                )}
-                <img src={selectedImage} alt={`${selectedProduct.title} ${(selectedProduct.imageIndex || 0) + 1}`} />
-                {selectedImages.length > 1 && (
-                  <button className="carousel-arrow carousel-next" type="button" onClick={() => moveSelectedImage(1)} aria-label="Imagen siguiente">
-                    <ChevronRight size={24} />
-                  </button>
-                )}
-                {selectedImages.length > 1 && (
-                  <span className="carousel-count">{(selectedProduct.imageIndex || 0) + 1} / {selectedImages.length}</span>
-                )}
-              </div>
-            ) : (
-              <div className="landing-product-empty large">Sin imagen</div>
-            )}
-          </div>
-        </div>
-      )}
     </main>
   )
 }

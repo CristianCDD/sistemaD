@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import DashboardShell from './components/DashboardShell'
 import { api, clearStoredSession, refreshKey, setAuthToken, tokenKey } from './services/api'
 import CalendarView from './views/CalendarView'
+import CatalogPage from './views/CatalogPage'
 import ConfigView from './views/ConfigView'
 import HomeView from './views/HomeView'
 import LandingView from './views/LandingView'
@@ -50,6 +51,7 @@ function App() {
   }
 
   if (publicPath === '/landing') return <PublicEntry onLogin={handleLogin} />
+  if (publicPath === '/catalogo') return <CatalogPage />
   if (publicPath === '/guia-materiales' || publicPath === '/materiales') return <MaterialGuideView publicMode />
   if (booting) return <div className="boot-screen">Cargando sistema...</div>
   if (!accessToken) return <PublicEntry onLogin={handleLogin} />

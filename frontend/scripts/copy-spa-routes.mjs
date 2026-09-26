@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 const rootDir = dirname(dirname(fileURLToPath(import.meta.url)))
 const distDir = join(rootDir, 'dist')
 const indexFile = join(distDir, 'index.html')
-const routes = ['landing', 'guia-materiales', 'materiales']
+const routes = ['landing', 'catalogo', 'guia-materiales', 'materiales']
 
 await Promise.all(routes.map(async (route) => {
   const routeDir = join(distDir, route)

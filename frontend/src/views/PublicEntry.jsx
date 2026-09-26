@@ -35,7 +35,8 @@ function PublicEntry({ onLogin }) {
         <nav className="public-nav">
           <BrandMark />
           <div className="public-nav-links">
-            <a href="/landing">Catalogo publico</a>
+            <a href="/landing">Inicio publico</a>
+            <a href="/catalogo">Catalogo publico</a>
             <a href="#login">Ingresar</a>
           </div>
         </nav>
@@ -45,7 +46,7 @@ function PublicEntry({ onLogin }) {
           <p>{config?.subheadline || 'Controla productos, stock y servicios desde un solo lugar.'}</p>
           <div className="public-actions">
             <a className="primary-link" href="#login">Entrar al sistema</a>
-            <a className="ghost-link" href="/landing">Ver catalogo</a>
+            <a className="ghost-link" href="/catalogo">Ver catalogo</a>
           </div>
         </div>
         <div className="public-products" id="productos">
