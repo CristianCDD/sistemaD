@@ -37,6 +37,7 @@ function LandingPage() {
             <a href="/guia-materiales">Guia de materiales</a>
             <a href="#ubicacion">Ubicacion</a>
             <a href="#contacto">WhatsApp</a>
+            <a href="/panel">Panel</a>
           </div>
         </nav>
 
@@ -61,6 +62,9 @@ function LandingPage() {
               )}
               <a className="landing-secondary" href="/guia-materiales">
                 Guia de materiales
+              </a>
+              <a className="landing-secondary" href="/panel">
+                Panel
               </a>
             </div>
           </div>
