@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { Award, Box, ChevronDown, ChevronLeft, ChevronRight, Headphones, MapPin, MessageCircle, PackageCheck, Phone, Search, Truck, X } from 'lucide-react'
 
 import { API_URL } from '../services/api'
+import foamImage from '../assets/catalog/ojalillos.png'
+import ojalillosImage from '../assets/catalog/pavonado.png'
+import pvcImage from '../assets/catalog/vinil-imantado.png'
+import vinilRolloImage from '../assets/catalog/vinil-rollo.png'
 import logo from '../assets/landing/logo-nav.png'
 
 const productImages = (product) => product.catalog_image_urls?.length ? product.catalog_image_urls : product.image_url ? [product.image_url] : []
@@ -101,10 +105,10 @@ function CatalogPage() {
           </div>
         </div>
         <div className="catalog-banner-visual" aria-hidden="true">
-          <div className="material-slice roll" />
-          <div className="material-slice pvc" />
-          <div className="material-slice rings" />
-          <div className="material-slice foam" />
+          <div className="material-slice"><img src={vinilRolloImage} alt="" /></div>
+          <div className="material-slice"><img src={pvcImage} alt="" /></div>
+          <div className="material-slice"><img src={ojalillosImage} alt="" /></div>
+          <div className="material-slice"><img src={foamImage} alt="" /></div>
         </div>
         <div className="catalog-banner-note">
           <strong>Calidad en cada proyecto</strong>

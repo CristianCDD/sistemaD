@@ -1090,46 +1090,53 @@ button {
 .catalog-banner-visual {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 0 0 0 6px;
-  background: linear-gradient(110deg, rgba(255, 255, 255, 0.95), rgba(224, 239, 255, 0.6));
+  gap: 6px;
+  padding: 0 0 0 8px;
+  background: linear-gradient(110deg, #fff 0%, #f8fcff 45%, #eaf6ff 100%);
 }
 
 .material-slice {
+  position: relative;
+  overflow: hidden;
   min-height: 330px;
   transform: skewX(-13deg);
-  border-left: 7px solid #fff;
-  border-right: 7px solid #fff;
-  background-position: center;
-  background-size: cover;
-  box-shadow: inset 0 0 80px rgba(8, 39, 93, 0.1);
+  border-left: 6px solid #fff;
+  border-right: 6px solid #fff;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(232, 244, 255, 0.42)),
+    radial-gradient(circle at 50% 45%, #fff 0, #edf6ff 68%);
+  box-shadow: inset 0 0 58px rgba(8, 39, 93, 0.08);
 }
 
-.material-slice.roll {
-  background:
-    radial-gradient(circle at 50% 50%, #7b5f3f 0 12%, #eee 13% 28%, transparent 29%),
-    linear-gradient(160deg, transparent 45%, rgba(255, 255, 255, 0.9) 46% 58%, transparent 59%),
-    linear-gradient(145deg, #f8fafc, #d8e5f3);
+.material-slice img {
+  width: 168%;
+  height: 100%;
+  margin-left: -34%;
+  display: block;
+  object-fit: contain;
+  object-position: center 56%;
+  transform: skewX(13deg) scale(1.24);
+  filter: contrast(1.06) saturate(1.04) drop-shadow(0 22px 26px rgba(8, 39, 93, 0.18));
 }
 
-.material-slice.pvc {
-  background:
-    repeating-linear-gradient(168deg, #ffffff 0 34px, #e7edf7 35px 54px, #ffffff 55px 82px),
-    linear-gradient(#f8fbff, #dfeaf7);
+.material-slice:nth-child(1) img {
+  object-position: 58% 60%;
+  transform: skewX(13deg) scale(1.44);
 }
 
-.material-slice.rings {
-  background:
-    radial-gradient(circle at 38% 40%, transparent 0 10%, #f8fafc 11% 15%, #c7ccd5 16% 25%, transparent 26%),
-    radial-gradient(circle at 62% 58%, transparent 0 9%, #f8fafc 10% 14%, #b7bfcb 15% 24%, transparent 25%),
-    radial-gradient(circle at 50% 72%, transparent 0 8%, #f8fafc 9% 13%, #c8ced7 14% 23%, transparent 24%),
-    linear-gradient(140deg, #ffffff, #dce8f6);
+.material-slice:nth-child(2) img {
+  object-position: 50% 58%;
+  transform: skewX(13deg) scale(1.34);
 }
 
-.material-slice.foam {
-  background:
-    repeating-linear-gradient(166deg, #ffffff 0 42px, #f2f4f8 43px 72px, #111827 73px 112px, #2b3445 113px 145px),
-    linear-gradient(#fff, #d7e5f3);
+.material-slice:nth-child(3) img {
+  object-position: 50% 57%;
+  transform: skewX(13deg) scale(1.4);
+}
+
+.material-slice:nth-child(4) img {
+  object-position: 50% 58%;
+  transform: skewX(13deg) scale(1.34);
 }
 
 .catalog-banner-note {
