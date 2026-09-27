@@ -120,8 +120,12 @@ function CalendarView() {
       if (dayNumber < 1 || dayNumber > last.getDate()) return null
       const date = `${month}-${String(dayNumber).padStart(2, '0')}`
       const dayMovements = movementsByDate.get(date) || []
-      const entradas = dayMovements.filter((movement) => movement.movement_type === 'entrada').length
-      const salidas = dayMovements.filter((movement) => movement.movement_type === 'salida').length
+      const entradas = dayMovements
+        .filter((movement) => movement.movement_type === 'entrada')
+        .reduce((total, movement) => total + Number(movement.quantity || 0), 0)
+      const salidas = dayMovements
+        .filter((movement) => movement.movement_type === 'salida')
+        .reduce((total, movement) => total + Number(movement.quantity || 0), 0)
 
       return { date, dayNumber, movements: dayMovements, entradas, salidas }
     })
