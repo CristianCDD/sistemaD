@@ -1,4 +1,4 @@
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -87,8 +87,8 @@ class StockSummaryView(APIView):
         normal = max(total_products - exhausted, 0)
 
         movements = movements_queryset.aggregate(
-            entries=Sum('quantity', filter=Q(movement_type=StockMovement.MovementType.IN)),
-            exits=Sum('quantity', filter=Q(movement_type=StockMovement.MovementType.OUT)),
+            entries=Count('id', filter=Q(movement_type=StockMovement.MovementType.IN)),
+            exits=Count('id', filter=Q(movement_type=StockMovement.MovementType.OUT)),
             total=Count('id'),
         )
 
