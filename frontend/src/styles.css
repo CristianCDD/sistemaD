@@ -1368,8 +1368,8 @@ button {
   position: relative;
   overflow: hidden;
   display: grid;
-  grid-template-rows: 180px 1fr;
-  min-height: 390px;
+  grid-template-rows: 190px minmax(150px, 1fr);
+  min-height: 360px;
   border: 1px solid #d7e7f7;
   border-radius: 8px;
   background: #fff;
@@ -1430,9 +1430,9 @@ button {
 }
 
 .catalog-product-info {
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  align-content: start;
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
   gap: 10px;
   padding: 14px;
 }
@@ -1446,6 +1446,7 @@ button {
 }
 
 .catalog-product-info p {
+  min-height: 50px;
   margin: 0;
   color: #52698d;
   font-size: 13px;
@@ -1472,6 +1473,7 @@ button {
 
 .catalog-quote-button {
   min-height: 42px;
+  margin-top: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
