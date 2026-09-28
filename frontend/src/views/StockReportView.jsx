@@ -21,6 +21,41 @@ import { api } from '../services/api'
 import { inventoryPrice, localDateInputValue, money, statusLabel, stockBadge } from '../utils/format'
 import ProductDrawer from './ProductDrawer'
 
+const quickRanges = [
+  { id: 'today', label: 'Hoy' },
+  { id: 'week', label: 'Semana' },
+  { id: 'month', label: 'Mes' },
+  { id: 'previous-month', label: 'Mes anterior' },
+  { id: 'all', label: 'Todo' },
+]
+
+function quickRangeDates(rangeId) {
+  const today = new Date()
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+
+  if (rangeId === 'today') {
+    const date = localDateInputValue(today)
+    return { from: date, to: date }
+  }
+
+  if (rangeId === 'week') {
+    const day = today.getDay() || 7
+    const start = new Date(today)
+    start.setDate(today.getDate() - day + 1)
+    return { from: localDateInputValue(start), to: localDateInputValue(today) }
+  }
+
+  if (rangeId === 'previous-month') {
+    const start = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+    const end = new Date(today.getFullYear(), today.getMonth(), 0)
+    return { from: localDateInputValue(start), to: localDateInputValue(end) }
+  }
+
+  if (rangeId === 'all') return { from: '', to: '' }
+
+  return { from: localDateInputValue(startOfMonth), to: localDateInputValue(today) }
+}
+
 function StockReportView() {
   const [report, setReport] = useState(null)
   const [products, setProducts] = useState([])
@@ -29,17 +64,36 @@ function StockReportView() {
   const [historyProduct, setHistoryProduct] = useState(null)
   const [dateFrom, setDateFrom] = useState(() => localDateInputValue(new Date(new Date().getFullYear(), new Date().getMonth(), 1)))
   const [dateTo, setDateTo] = useState(() => localDateInputValue())
+  const [activeRange, setActiveRange] = useState('month')
   const [loading, setLoading] = useState(true)
 
-  const load = async () => {
+  const load = async ({ from = dateFrom, to = dateTo, product = selectedProduct } = {}) => {
     setLoading(true)
     const params = new URLSearchParams()
-    if (selectedProduct) params.set('producto', selectedProduct)
-    if (dateFrom) params.set('desde', dateFrom)
-    if (dateTo) params.set('hasta', dateTo)
+    if (product) params.set('producto', product)
+    if (from) params.set('desde', from)
+    if (to) params.set('hasta', to)
     const response = await api.get(`/reportes/stock/?${params.toString()}`)
     setReport(response.data)
     setLoading(false)
+  }
+
+  const applyQuickRange = (rangeId) => {
+    const range = quickRangeDates(rangeId)
+    setActiveRange(rangeId)
+    setDateFrom(range.from)
+    setDateTo(range.to)
+    load({ from: range.from, to: range.to })
+  }
+
+  const updateDateFrom = (value) => {
+    setActiveRange('')
+    setDateFrom(value)
+  }
+
+  const updateDateTo = (value) => {
+    setActiveRange('')
+    setDateTo(value)
   }
 
   const loadProducts = async () => {
@@ -101,8 +155,20 @@ function StockReportView() {
                 <option key={product.id} value={product.id}>{product.name} ({product.sku || 'sin codigo'})</option>
               ))}
             </select>
-            <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
-            <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
+            <div className="quick-range-group" aria-label="Rangos rapidos">
+              {quickRanges.map((range) => (
+                <button
+                  className={`quick-range-button ${activeRange === range.id ? 'active' : ''}`.trim()}
+                  key={range.id}
+                  onClick={() => applyQuickRange(range.id)}
+                  type="button"
+                >
+                  {range.label}
+                </button>
+              ))}
+            </div>
+            <input type="date" value={dateFrom} onChange={(event) => updateDateFrom(event.target.value)} />
+            <input type="date" value={dateTo} onChange={(event) => updateDateTo(event.target.value)} />
             {selectedProductData && (
               <button className="soft-button compact" onClick={() => setHistoryProduct(selectedProductData)}>
                 <History size={16} /> Historial completo
@@ -113,7 +179,7 @@ function StockReportView() {
                 <X size={16} />
               </button>
             )}
-            <button className="primary-button compact" onClick={load}><RefreshCcw size={16} /> Aplicar</button>
+            <button className="primary-button compact" onClick={() => load()}><RefreshCcw size={16} /> Aplicar</button>
           </div>
         }
       />
