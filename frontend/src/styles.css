@@ -1816,8 +1816,8 @@ textarea:focus {
 }
 
 .report-filters {
-  display: grid;
-  grid-template-columns: minmax(240px, 1fr) minmax(360px, auto) 150px 150px auto auto auto;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   width: 100%;
@@ -1825,13 +1825,20 @@ textarea:focus {
 
 .report-filters select,
 .report-filters input {
+  flex: 0 1 150px;
   min-width: 0;
+}
+
+.report-filters select {
+  flex: 1 1 230px;
 }
 
 .quick-range-group {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, auto));
+  flex: 1 1 430px;
+  grid-template-columns: repeat(5, minmax(74px, 1fr));
   gap: 6px;
+  min-width: min(100%, 390px);
 }
 
 .quick-range-button {
@@ -1842,7 +1849,7 @@ textarea:focus {
   cursor: pointer;
   font-weight: 800;
   min-height: 42px;
-  padding: 0 12px;
+  padding: 0 10px;
   white-space: nowrap;
 }
 
@@ -2909,7 +2916,7 @@ td small {
   }
 
   .stock-report-header .report-filters {
-    grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr) minmax(140px, 0.5fr) minmax(140px, 0.5fr);
+    align-items: stretch;
   }
 }
 
@@ -3024,10 +3031,12 @@ td small {
   }
 
   .stock-report-header .report-filters {
+    display: grid;
     grid-template-columns: 1fr;
   }
 
   .quick-range-group {
+    min-width: 0;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
