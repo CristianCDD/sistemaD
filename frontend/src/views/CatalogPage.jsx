@@ -49,9 +49,13 @@ function CatalogPage() {
   }
 
   const openProduct = (product) => {
+    const description = (product.description || product.descripcion || '').trim()
     setSelectedProduct({
       images: productImages(product),
       title: product.name,
+      category: productCategory(product),
+      description,
+      tags: productTags(product),
       imageIndex: cardImageIndex(product),
     })
   }
@@ -220,36 +224,50 @@ function CatalogPage() {
       </section>
 
       {selectedProduct && (
-        <div className="landing-image-modal" role="dialog" aria-modal="true">
-          <div className="landing-image-viewer">
-            <button className="icon-button landing-image-close" type="button" onClick={() => setSelectedProduct(null)} aria-label="Cerrar imagen">
+        <div className="catalog-detail-modal" role="dialog" aria-modal="true" onClick={() => setSelectedProduct(null)}>
+          <section className="catalog-detail-viewer" onClick={(event) => event.stopPropagation()}>
+            <button className="icon-button catalog-detail-close" type="button" onClick={() => setSelectedProduct(null)} aria-label="Cerrar producto">
               <X size={22} />
             </button>
-            <div className="landing-image-title">
-              <span>Producto</span>
-              <strong>{selectedProduct.title}</strong>
+            <div className="catalog-detail-media">
+              {selectedImage ? (
+                <div className="image-carousel">
+                  {selectedImages.length > 1 && (
+                    <button className="carousel-arrow carousel-prev" type="button" onClick={() => moveSelectedImage(-1)} aria-label="Imagen anterior">
+                      <ChevronLeft size={24} />
+                    </button>
+                  )}
+                  <img src={selectedImage} alt={`${selectedProduct.title} ${(selectedProduct.imageIndex || 0) + 1}`} />
+                  {selectedImages.length > 1 && (
+                    <button className="carousel-arrow carousel-next" type="button" onClick={() => moveSelectedImage(1)} aria-label="Imagen siguiente">
+                      <ChevronRight size={24} />
+                    </button>
+                  )}
+                  {selectedImages.length > 1 && (
+                    <span className="carousel-count">{(selectedProduct.imageIndex || 0) + 1} / {selectedImages.length}</span>
+                  )}
+                </div>
+              ) : (
+                <div className="landing-product-empty large">Sin imagen</div>
+              )}
             </div>
-            {selectedImage ? (
-              <div className="image-carousel">
-                {selectedImages.length > 1 && (
-                  <button className="carousel-arrow carousel-prev" type="button" onClick={() => moveSelectedImage(-1)} aria-label="Imagen anterior">
-                    <ChevronLeft size={24} />
-                  </button>
-                )}
-                <img src={selectedImage} alt={`${selectedProduct.title} ${(selectedProduct.imageIndex || 0) + 1}`} />
-                {selectedImages.length > 1 && (
-                  <button className="carousel-arrow carousel-next" type="button" onClick={() => moveSelectedImage(1)} aria-label="Imagen siguiente">
-                    <ChevronRight size={24} />
-                  </button>
-                )}
-                {selectedImages.length > 1 && (
-                  <span className="carousel-count">{(selectedProduct.imageIndex || 0) + 1} / {selectedImages.length}</span>
-                )}
+            <div className="catalog-detail-info">
+              <span>{selectedProduct.category}</span>
+              <h2>{selectedProduct.title}</h2>
+              {selectedProduct.description && <p>{selectedProduct.description}</p>}
+              <div className="catalog-product-tags">
+                {selectedProduct.tags.map((tag, index) => <small key={`${tag}-${index}`}>{tag}</small>)}
               </div>
-            ) : (
-              <div className="landing-product-empty large">Sin imagen</div>
-            )}
-          </div>
+              <a
+                className="catalog-quote-button"
+                href={`https://wa.me/51991927653?text=${encodeURIComponent(`Hola, quiero cotizar ${selectedProduct.title}.`)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Cotizar por WhatsApp <ChevronRight size={18} />
+              </a>
+            </div>
+          </section>
         </div>
       )}
     </main>
