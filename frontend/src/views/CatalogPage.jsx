@@ -149,6 +149,7 @@ function CatalogPage() {
             const currentImage = images[currentIndex]
             const category = productCategory(product)
             const tags = productTags(product)
+            const description = (product.description || product.descripcion || '').trim()
 
             return (
               <article
@@ -185,7 +186,7 @@ function CatalogPage() {
                 )}
                 <div className="catalog-product-info">
                   <strong>{product.name}</strong>
-                  <p>{product.description || product.descripcion || 'Material disponible para trabajos publicitarios. Consulta medidas, stock y precios por WhatsApp.'}</p>
+                  {description && <p>{description}</p>}
                   <div className="catalog-product-tags">
                     {tags.map((tag, index) => <span key={`${tag}-${index}`}>{tag}</span>)}
                   </div>
