@@ -13,7 +13,7 @@ const productImages = (product) => product.catalog_image_urls?.length ? product.
 const productCategory = (product) => product.category || product.categoria || product.type || product.tipo || 'Materiales'
 
 const productTags = (product) => {
-  const values = [product.sku, product.codigo, product.category, product.categoria, product.unit, product.unidad].filter(Boolean)
+  const values = [product.category, product.categoria, product.unit, product.unidad].filter(Boolean)
   return values.length ? values.slice(0, 3) : ['Consultar', 'Stock', 'Mayor']
 }
 
@@ -38,7 +38,7 @@ function CatalogPage() {
   const filteredProducts = publicProducts.filter((product) => {
     const category = productCategory(product)
     const matchesCategory = selectedCategory === 'Todas las categorias' || category === selectedCategory
-    const haystack = [product.name, product.sku, product.codigo, category].filter(Boolean).join(' ').toLowerCase()
+    const haystack = [product.name, category].filter(Boolean).join(' ').toLowerCase()
     return matchesCategory && (!normalizedSearch || haystack.includes(normalizedSearch))
   })
 
@@ -132,7 +132,7 @@ function CatalogPage() {
               <input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Buscar producto o codigo..."
+                placeholder="Buscar producto..."
               />
             </label>
             <label className="catalog-select">
