@@ -13,8 +13,8 @@ const productImages = (product) => product.catalog_image_urls?.length ? product.
 const productCategory = (product) => product.category || product.categoria || product.type || product.tipo || 'Materiales'
 
 const productTags = (product) => {
-  const values = [product.category, product.categoria, product.unit, product.unidad].filter(Boolean)
-  return values.length ? values.slice(0, 3) : ['Consultar', 'Stock', 'Mayor']
+  const values = [product.unit, product.unidad].filter(Boolean)
+  return values.slice(0, 3)
 }
 
 function CatalogPage() {
@@ -191,9 +191,11 @@ function CatalogPage() {
                 <div className="catalog-product-info">
                   <strong>{product.name}</strong>
                   {description && <p>{description}</p>}
-                  <div className="catalog-product-tags">
-                    {tags.map((tag, index) => <span key={`${tag}-${index}`}>{tag}</span>)}
-                  </div>
+                  {tags.length > 0 && (
+                    <div className="catalog-product-tags">
+                      {tags.map((tag, index) => <span key={`${tag}-${index}`}>{tag}</span>)}
+                    </div>
+                  )}
                   <a
                     className="catalog-quote-button"
                     href={`https://wa.me/51991927653?text=${encodeURIComponent(`Hola, quiero cotizar ${product.name}.`)}`}
@@ -255,9 +257,11 @@ function CatalogPage() {
               <span>{selectedProduct.category}</span>
               <h2>{selectedProduct.title}</h2>
               {selectedProduct.description && <p>{selectedProduct.description}</p>}
-              <div className="catalog-product-tags">
-                {selectedProduct.tags.map((tag, index) => <small key={`${tag}-${index}`}>{tag}</small>)}
-              </div>
+              {selectedProduct.tags.length > 0 && (
+                <div className="catalog-product-tags">
+                  {selectedProduct.tags.map((tag, index) => <small key={`${tag}-${index}`}>{tag}</small>)}
+                </div>
+              )}
               <a
                 className="catalog-quote-button"
                 href={`https://wa.me/51991927653?text=${encodeURIComponent(`Hola, quiero cotizar ${selectedProduct.title}.`)}`}
