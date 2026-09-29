@@ -34,7 +34,6 @@ function LandingPage() {
           <div className="landing-nav-links">
             <a href="#tienda">Tienda</a>
             {publicProducts.length > 0 && <a href="/catalogo">Catalogo</a>}
-            <a href="/guia-materiales">Guia de materiales</a>
             <a href="#ubicacion">Ubicacion</a>
             <a href="#contacto">WhatsApp</a>
           </div>
@@ -59,9 +58,6 @@ function LandingPage() {
                   Ver catalogo <ArrowRight size={18} />
                 </a>
               )}
-              <a className="landing-secondary" href="/guia-materiales">
-                Guia de materiales
-              </a>
             </div>
           </div>
 
