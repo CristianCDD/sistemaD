@@ -93,7 +93,7 @@ function CatalogPage() {
         </nav>
         <div className="catalog-contact">
           <span><MapPin size={24} /> Av. Bolivia Nro. 148 Int. 3268<br />Cercado de Lima</span>
-          <a href="https://wa.me/51991927653" target="_blank" rel="noreferrer"><Phone size={22} /> 923327469</a>
+          <a href="https://wa.me/51923327469" target="_blank" rel="noreferrer"><Phone size={22} /> 923327469</a>
         </div>
       </header>
 
@@ -198,7 +198,7 @@ function CatalogPage() {
                   )}
                   <a
                     className="catalog-quote-button"
-                    href={`https://wa.me/51991927653?text=${encodeURIComponent(`Hola, quiero cotizar ${product.name}.`)}`}
+                    href={`https://wa.me/51923327469?text=${encodeURIComponent(`Hola, quiero cotizar ${product.name}.`)}`}
                     target="_blank"
                     rel="noreferrer"
                     onClick={(event) => event.stopPropagation()}
@@ -264,7 +264,7 @@ function CatalogPage() {
               )}
               <a
                 className="catalog-quote-button"
-                href={`https://wa.me/51991927653?text=${encodeURIComponent(`Hola, quiero cotizar ${selectedProduct.title}.`)}`}
+                href={`https://wa.me/51923327469?text=${encodeURIComponent(`Hola, quiero cotizar ${selectedProduct.title}.`)}`}
                 target="_blank"
                 rel="noreferrer"
               >

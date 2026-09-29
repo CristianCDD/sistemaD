@@ -48,7 +48,7 @@ function LandingPage() {
               Insumos de publicidad para negocios, talleres y emprendedores que necesitan materiales listos para trabajar.
             </p>
             <div className="landing-actions">
-              <a className="landing-whatsapp" href="https://wa.me/51999999999" target="_blank" rel="noreferrer">
+              <a className="landing-whatsapp" href="https://wa.me/51923327469" target="_blank" rel="noreferrer">
                 <MessageCircle size={18} /> 923327469
               </a>
               <a className="landing-primary" href="https://maps.app.goo.gl/F762ew5y7AZkvdco7" target="_blank" rel="noreferrer">
