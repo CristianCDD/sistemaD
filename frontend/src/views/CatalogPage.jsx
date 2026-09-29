@@ -203,7 +203,7 @@ function CatalogPage() {
                     rel="noreferrer"
                     onClick={(event) => event.stopPropagation()}
                   >
-                    Cotizar <ChevronRight size={18} />
+                    <MessageCircle size={20} /> Consultar por WhatsApp
                   </a>
                 </div>
               </article>
@@ -268,7 +268,7 @@ function CatalogPage() {
                 target="_blank"
                 rel="noreferrer"
               >
-                Cotizar por WhatsApp <ChevronRight size={18} />
+                <MessageCircle size={20} /> Consultar por WhatsApp
               </a>
             </div>
           </section>
