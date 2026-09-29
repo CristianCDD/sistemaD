@@ -1502,18 +1502,29 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 9px;
+  width: 100%;
+  padding: 10px 14px;
   border-radius: 8px;
   color: #fff;
   background: linear-gradient(120deg, #1fbd55, #10a948);
   text-decoration: none;
+  font-size: clamp(13px, 0.9vw, 15px);
   font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
   text-transform: none;
   box-shadow: 0 12px 24px rgba(16, 169, 72, 0.24);
 }
 
-.catalog-quote-button svg {
+.catalog-quote-button .whatsapp-icon {
   flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+}
+
+.catalog-quote-button span {
+  min-width: 0;
 }
 
 .catalog-service-strip {
