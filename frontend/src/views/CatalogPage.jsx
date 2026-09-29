@@ -93,7 +93,7 @@ function CatalogPage() {
         </nav>
         <div className="catalog-contact">
           <span><MapPin size={24} /> Av. Bolivia Nro. 148 Int. 3268<br />Cercado de Lima</span>
-          <a href="https://wa.me/51991927653" target="_blank" rel="noreferrer"><Phone size={22} /> 991-927-653</a>
+          <a href="https://wa.me/51991927653" target="_blank" rel="noreferrer"><Phone size={22} /> 923327469</a>
         </div>
       </header>
 

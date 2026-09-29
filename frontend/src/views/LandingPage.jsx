@@ -6,7 +6,7 @@ import logo from '../assets/landing/logo-nav.png'
 
 const storeImageUrl = 'https://res.cloudinary.com/dmbvogx69/image/upload/v1782657157/tienda_a03kjv.png'
 
-const whatsappNumbers = ['999999999', '987654321']
+const whatsappNumbers = ['923327469']
 
 const productImages = (product) => product.catalog_image_urls?.length ? product.catalog_image_urls : product.image_url ? [product.image_url] : []
 
@@ -49,7 +49,7 @@ function LandingPage() {
             </p>
             <div className="landing-actions">
               <a className="landing-whatsapp" href="https://wa.me/51999999999" target="_blank" rel="noreferrer">
-                <MessageCircle size={18} /> 999999999
+                <MessageCircle size={18} /> 923327469
               </a>
               <a className="landing-primary" href="https://maps.app.goo.gl/F762ew5y7AZkvdco7" target="_blank" rel="noreferrer">
                 <MapPin size={18} /> Como llegar
