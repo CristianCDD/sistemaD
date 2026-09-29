@@ -215,23 +215,55 @@ button {
 
 .landing-page {
   min-height: 100vh;
-  background: #f4f7fb;
+  scroll-behavior: smooth;
+  background:
+    radial-gradient(circle at 18% 0%, rgba(8, 174, 234, 0.16), transparent 34%),
+    linear-gradient(180deg, #061a37 0%, #0a3774 26%, #f4f8fd 26.1%, #eef5fc 100%);
   color: #0f172a;
 }
 
 .landing-hero {
-  min-height: 94vh;
-  padding: 24px;
+  position: relative;
+  min-height: 96vh;
+  padding: 24px 24px 70px;
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
   background:
-    linear-gradient(120deg, rgba(9, 34, 84, 0.9), rgba(15, 89, 160, 0.78)),
+    radial-gradient(circle at 75% 18%, rgba(8, 174, 234, 0.34), transparent 28%),
+    radial-gradient(circle at 18% 78%, rgba(22, 163, 74, 0.12), transparent 24%),
+    linear-gradient(115deg, rgba(4, 17, 43, 0.94), rgba(7, 55, 114, 0.9) 48%, rgba(5, 27, 62, 0.88)),
     url('https://res.cloudinary.com/dmbvogx69/image/upload/v1782541663/prd5_zruq1e.jpg') center / cover;
   color: #fff;
 }
 
+.landing-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 120px 120px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.7), transparent 78%);
+}
+
+.landing-hero::after {
+  content: "";
+  position: absolute;
+  right: -14vw;
+  bottom: -18vw;
+  width: 48vw;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(8, 174, 234, 0.18), transparent 68%);
+  pointer-events: none;
+}
+
 .landing-nav {
+  position: relative;
+  z-index: 3;
   min-height: 72px;
   display: flex;
   align-items: center;
@@ -239,8 +271,10 @@ button {
   gap: 18px;
   padding: 10px 16px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.13);
-  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(5, 19, 44, 0.52);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 20px 55px rgba(0, 0, 0, 0.22);
 }
 
 .landing-brand {
@@ -294,6 +328,8 @@ button {
 }
 
 .landing-hero-content {
+  position: relative;
+  z-index: 2;
   width: min(1180px, 100%);
   margin: 0 auto;
   display: grid;
@@ -322,8 +358,10 @@ button {
 }
 
 .landing-copy .landing-kicker {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.18);
+  color: #dff7ff;
+  background: rgba(8, 174, 234, 0.22);
+  border: 1px solid rgba(116, 216, 255, 0.3);
+  box-shadow: 0 12px 28px rgba(8, 174, 234, 0.15);
 }
 
 .landing-copy h1 {
@@ -331,6 +369,7 @@ button {
   font-size: clamp(48px, 8vw, 96px);
   line-height: 0.92;
   letter-spacing: 0;
+  text-shadow: 0 18px 46px rgba(0, 0, 0, 0.32);
 }
 
 .landing-copy p {
@@ -361,13 +400,14 @@ button {
 
 .landing-primary.dark {
   color: #fff;
-  background: #1b64e8;
+  background: linear-gradient(135deg, #0b74d1, #053d84);
+  box-shadow: 0 18px 38px rgba(6, 69, 150, 0.25);
 }
 
 .landing-whatsapp {
   padding: 12px 17px;
   color: #fff;
-  background: #16a34a;
+  background: linear-gradient(135deg, #20bf55, #0fa445);
   box-shadow: 0 18px 40px rgba(22, 163, 74, 0.22);
 }
 
@@ -384,20 +424,82 @@ button {
 .landing-secondary {
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(10px);
 }
 
 .landing-showcase {
+  isolation: isolate;
   min-height: 540px;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.02)),
+    radial-gradient(circle at 22% 18%, rgba(8, 174, 234, 0.22), transparent 32%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 34px 90px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(16px);
+  overflow: hidden;
+}
+
+.landing-showcase::before {
+  content: "";
+  position: absolute;
+  inset: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.showcase-panel-label,
+.showcase-scroll-note {
+  position: absolute;
+  z-index: 4;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(4, 17, 43, 0.68);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+.showcase-panel-label {
+  top: 26px;
+  left: 28px;
+  max-width: 270px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 4px;
+}
+
+.showcase-panel-label span,
+.showcase-scroll-note {
+  color: #8ee7ff;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.showcase-panel-label strong {
+  color: #fff;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.showcase-scroll-note {
+  right: 26px;
+  bottom: 24px;
+  padding: 10px 14px;
 }
 
 .showcase-image {
   position: absolute;
-  width: 42%;
+  width: 39%;
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: contain;
   aspect-ratio: 4 / 5;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32);
+  padding: 12px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(237, 247, 255, 0.86));
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.42);
   animation: floatProduct 7s ease-in-out infinite;
 }
 
@@ -449,7 +551,7 @@ button {
 .landing-product-card,
 .landing-location {
   border-radius: 8px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.96);
   box-shadow: 0 20px 60px rgba(28, 39, 67, 0.12);
 }
 
@@ -459,6 +561,13 @@ button {
   display: grid;
   align-content: start;
   gap: 9px;
+  border: 1px solid rgba(205, 224, 244, 0.88);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.landing-strip article:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 26px 70px rgba(11, 75, 150, 0.16);
 }
 
 .landing-strip svg {
@@ -472,7 +581,7 @@ button {
 
 .landing-store-section {
   width: min(1180px, calc(100% - 32px));
-  margin: 72px auto 0;
+  margin: 84px auto 0;
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.95fr);
   gap: 18px;
@@ -506,12 +615,13 @@ button {
   align-content: center;
   gap: 18px;
   background:
-    linear-gradient(135deg, rgba(255, 246, 209, 0.9), rgba(255, 255, 255, 0.96) 48%, rgba(232, 243, 255, 0.96));
+    radial-gradient(circle at 90% 12%, rgba(8, 174, 234, 0.22), transparent 30%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(232, 243, 255, 0.96));
 }
 
 .store-kicker {
-  color: #c2410c;
-  background: #fff0d1;
+  color: #064d9c;
+  background: #e7f5ff;
 }
 
 .store-copy-panel h2 {
@@ -969,6 +1079,10 @@ button {
   grid-template-columns: 0.8fr 1.2fr;
   gap: 18px;
   align-items: stretch;
+  border: 1px solid rgba(205, 224, 244, 0.88);
+  background:
+    radial-gradient(circle at 12% 10%, rgba(8, 174, 234, 0.12), transparent 28%),
+    #fff;
 }
 
 .location-copy {
@@ -987,6 +1101,7 @@ button {
   overflow: hidden;
   border-radius: 8px;
   background: #e2e8f0;
+  box-shadow: inset 0 0 0 1px rgba(6, 54, 112, 0.08);
 }
 
 .map-frame iframe {
@@ -1009,10 +1124,13 @@ button {
   gap: 28px;
   align-items: center;
   padding: 32px;
-  border: 1px solid #dbe6f5;
+  border: 1px solid rgba(90, 169, 238, 0.32);
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
+  background:
+    radial-gradient(circle at 92% 16%, rgba(8, 174, 234, 0.24), transparent 32%),
+    linear-gradient(135deg, #061a37, #0a3774 58%, #06305f);
+  box-shadow: 0 28px 80px rgba(6, 26, 55, 0.2);
+  color: #fff;
 }
 
 .catalog-callout-copy {
@@ -1028,6 +1146,10 @@ button {
   line-height: 0.98;
 }
 
+.catalog-callout-copy h2 {
+  color: #fff;
+}
+
 .catalog-callout-copy p,
 .catalog-hero p {
   max-width: 720px;
@@ -1035,6 +1157,10 @@ button {
   color: #5d708f;
   font-size: 18px;
   line-height: 1.6;
+}
+
+.catalog-callout-copy p {
+  color: rgba(255, 255, 255, 0.76);
 }
 
 .catalog-callout-preview {
@@ -1048,9 +1174,10 @@ button {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: contain;
-  border: 1px solid #e2eaf5;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  background: #eef2f7;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.22);
 }
 
 .catalog-page {
@@ -1591,15 +1718,19 @@ button {
 .landing-contact {
   width: min(980px, calc(100% - 32px));
   margin: 72px auto;
-  padding: 20px;
+  padding: 22px;
   display: flex;
   gap: 18px;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
   border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 20px 60px rgba(28, 39, 67, 0.12);
+  border: 1px solid rgba(90, 169, 238, 0.28);
+  background:
+    linear-gradient(135deg, rgba(6, 26, 55, 0.98), rgba(8, 58, 121, 0.96)),
+    #061a37;
+  color: #fff;
+  box-shadow: 0 24px 70px rgba(6, 26, 55, 0.24);
 }
 
 .landing-contact > svg {
@@ -1614,7 +1745,7 @@ button {
 }
 
 .landing-contact span {
-  color: #64748b;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .landing-contact-actions {

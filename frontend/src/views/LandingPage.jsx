@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 import { ArrowRight, BadgeCheck, BookOpen, Building2, MapPin, MessageCircle, PackageCheck, ShoppingBag, Store, Truck } from 'lucide-react'
 
 import { API_URL } from '../services/api'
+import foamImage from '../assets/catalog/ojalillos.png'
+import ojalillosImage from '../assets/catalog/pavonado.png'
+import pvcImage from '../assets/catalog/vinil-imantado.png'
+import vinilRolloImage from '../assets/catalog/vinil-rollo.png'
 import logo from '../assets/landing/logo-nav.png'
 
 const storeImageUrl = 'https://res.cloudinary.com/dmbvogx69/image/upload/v1782657157/tienda_a03kjv.png'
@@ -41,6 +45,14 @@ function LandingPage() {
   }, [])
 
   const showcaseProducts = publicProducts.filter((product) => productCover(product)).slice(0, 4)
+  const showcaseItems = showcaseProducts.length > 0
+    ? showcaseProducts.map((product) => ({ src: productCover(product), alt: product.name, id: product.id }))
+    : [
+      { src: vinilRolloImage, alt: 'Vinil para publicidad', id: 'vinil' },
+      { src: pvcImage, alt: 'PVC para publicidad', id: 'pvc' },
+      { src: ojalillosImage, alt: 'Accesorios para publicidad', id: 'ojalillos' },
+      { src: foamImage, alt: 'Foam para publicidad', id: 'foam' },
+    ]
 
   return (
     <main className="landing-page">
@@ -51,7 +63,7 @@ function LandingPage() {
           </a>
           <div className="landing-nav-links">
             <a href="#tienda">Tienda</a>
-            {publicProducts.length > 0 && <a href="/catalogo">Catalogo</a>}
+            <a href="/catalogo">Catalogo</a>
             <a href="#ubicacion">Ubicacion</a>
             <a href="#contacto">WhatsApp</a>
           </div>
@@ -71,26 +83,27 @@ function LandingPage() {
               <a className="landing-primary" href="https://maps.app.goo.gl/F762ew5y7AZkvdco7" target="_blank" rel="noreferrer">
                 <MapPin size={18} /> Como llegar
               </a>
-              {publicProducts.length > 0 && (
-                <a className="landing-secondary" href="/catalogo">
-                  Ver catalogo <ArrowRight size={18} />
-                </a>
-              )}
+              <a className="landing-secondary" href="/catalogo">
+                Ver catalogo <ArrowRight size={18} />
+              </a>
             </div>
           </div>
 
-          {showcaseProducts.length > 0 && (
-            <div className="landing-showcase" aria-label="Productos destacados">
-              {showcaseProducts.map((product, index) => (
+          <div className="landing-showcase" aria-label="Productos destacados">
+            <div className="showcase-panel-label">
+              <span>Catalogo visual</span>
+              <strong>Materiales listos para publicidad</strong>
+            </div>
+            {showcaseItems.map((product, index) => (
               <img
                 className={`showcase-image showcase-${index + 1}`}
-                src={productCover(product)}
-                alt={product.name}
+                src={product.src}
+                alt={product.alt}
                 key={product.id}
               />
-              ))}
-            </div>
-          )}
+            ))}
+            <div className="showcase-scroll-note">Stock y consultas por WhatsApp</div>
+          </div>
         </div>
       </section>
 
