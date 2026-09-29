@@ -3115,14 +3115,50 @@ td small {
   }
 
   .catalog-banner-copy {
-    padding: 26px 18px;
+    padding: 18px 14px 16px;
+    gap: 12px;
+    align-content: start;
   }
 
-  .catalog-benefits,
+  .catalog-banner-copy h1 {
+    max-width: 280px;
+    font-size: clamp(30px, 11vw, 42px);
+    line-height: 1;
+  }
+
+  .catalog-banner-copy p {
+    max-width: 310px;
+    font-size: 13px;
+    line-height: 1.35;
+  }
+
   .catalog-tools,
   .catalog-grid,
   .catalog-service-strip {
     grid-template-columns: 1fr;
+  }
+
+  .catalog-benefits {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 2px;
+    max-width: 320px;
+  }
+
+  .catalog-benefits span {
+    min-height: 46px;
+    gap: 7px;
+    padding: 7px 8px;
+    border-right: 0;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 10px;
+  }
+
+  .catalog-benefits svg {
+    width: 17px;
+    height: 17px;
+    flex: 0 0 auto;
   }
 
   .catalog-banner {
@@ -3131,10 +3167,19 @@ td small {
 
   .catalog-banner-visual {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 220px;
+    padding-left: 0;
+    gap: 4px;
+  }
+
+  .material-slice {
+    min-height: 110px;
+    border-left-width: 3px;
+    border-right-width: 3px;
   }
 
   .catalog-banner-note {
-    padding: 26px 18px;
+    display: none;
   }
 
   .catalog-section {
