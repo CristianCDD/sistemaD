@@ -12,6 +12,24 @@ const productImages = (product) => product.catalog_image_urls?.length ? product.
 
 const productCover = (product) => productImages(product)[0] || ''
 
+function WhatsAppIcon({ size = 18 }) {
+  return (
+    <svg
+      aria-hidden="true"
+      className="whatsapp-icon"
+      viewBox="0 0 32 32"
+      width={size}
+      height={size}
+      focusable="false"
+    >
+      <path
+        fill="currentColor"
+        d="M16.02 3.2C8.95 3.2 3.2 8.88 3.2 15.86c0 2.23.6 4.42 1.74 6.34L3.1 28.8l6.82-1.78a12.9 12.9 0 0 0 6.1 1.53c7.07 0 12.82-5.68 12.82-12.66S23.09 3.2 16.02 3.2Zm0 23.2c-1.94 0-3.84-.52-5.5-1.5l-.4-.24-4.04 1.06 1.08-3.86-.26-.4a10.32 10.32 0 0 1-1.58-5.6c0-5.8 4.8-10.52 10.7-10.52s10.7 4.72 10.7 10.52-4.8 10.54-10.7 10.54Zm5.86-7.88c-.32-.16-1.9-.93-2.2-1.04-.3-.1-.52-.16-.74.16-.22.32-.84 1.04-1.04 1.26-.2.22-.38.24-.7.08-.32-.16-1.36-.5-2.58-1.58a9.5 9.5 0 0 1-1.78-2.18c-.18-.32-.02-.5.14-.66.14-.14.32-.38.48-.56.16-.2.22-.32.32-.54.1-.22.06-.4-.02-.56-.08-.16-.74-1.78-1.02-2.44-.26-.64-.54-.56-.74-.56h-.64c-.22 0-.56.08-.86.4-.3.32-1.12 1.08-1.12 2.64s1.14 3.06 1.3 3.28c.16.22 2.24 3.38 5.42 4.74.76.32 1.34.52 1.8.66.76.24 1.46.2 2 .12.62-.1 1.9-.76 2.16-1.5.26-.74.26-1.38.18-1.5-.08-.14-.3-.22-.62-.38Z"
+      />
+    </svg>
+  )
+}
+
 function LandingPage() {
   const [publicProducts, setPublicProducts] = useState([])
 
@@ -48,7 +66,7 @@ function LandingPage() {
             </p>
             <div className="landing-actions">
               <a className="landing-whatsapp" href="https://wa.me/51923327469" target="_blank" rel="noreferrer">
-                <MessageCircle size={18} /> 923327469
+                <WhatsAppIcon size={20} /> 923327469
               </a>
               <a className="landing-primary" href="https://maps.app.goo.gl/F762ew5y7AZkvdco7" target="_blank" rel="noreferrer">
                 <MapPin size={18} /> Como llegar
@@ -175,7 +193,7 @@ function LandingPage() {
         <div className="landing-contact-actions">
           {whatsappNumbers.map((number) => (
             <a className="landing-whatsapp" href={`https://wa.me/51${number}`} target="_blank" rel="noreferrer" key={number}>
-              <MessageCircle size={18} /> {number}
+              <WhatsAppIcon size={20} /> {number}
             </a>
           ))}
         </div>
