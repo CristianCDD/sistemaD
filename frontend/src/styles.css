@@ -1036,6 +1036,7 @@ button {
 }
 
 .catalog-detail-viewer {
+  --detail-image-height: calc(min(82vh, 760px) - 92px);
   position: relative;
   width: min(1180px, calc(100vw - 48px));
   height: min(82vh, 760px);
@@ -1074,9 +1075,9 @@ button {
 
 .catalog-detail-media .image-carousel img {
   width: 100% !important;
-  height: 100% !important;
+  height: var(--detail-image-height) !important;
   max-width: 100%;
-  max-height: 100%;
+  max-height: var(--detail-image-height);
   object-fit: contain !important;
   padding: 0;
 }
@@ -3343,6 +3344,7 @@ td small {
   }
 
   .catalog-detail-viewer {
+    --detail-image-height: calc(min(48vh, 420px) - 44px);
     grid-template-columns: 1fr;
     height: auto;
     overflow-y: auto;
