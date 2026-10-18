@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { Edit3, Plus, RefreshCcw, Save, Trash2 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { Edit3, Plus, Trash2 } from 'lucide-react'
 
 import Header from '../components/Header'
 import { api } from '../services/api'
@@ -10,7 +10,13 @@ function LandingView() {
   const [config, setConfig] = useState(null)
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [saveStatus, setSaveStatus] = useState('')
+  const configRef = useRef(null)
+  const pendingConfig = useRef({})
+  const saveInFlight = useRef(false)
+  const saveTimer = useRef(null)
+  const mounted = useRef(true)
+  const configRevision = useRef(0)
   const [editing, setEditing] = useState(null)
   const [creating, setCreating] = useState(false)
   const [query, setQuery] = useState('')
@@ -25,7 +31,7 @@ function LandingView() {
         api.get('/landing/config/'),
         api.get('/catalogo/'),
       ])
-      setConfig(configResponse.data[0] || {
+      const initialConfig = configResponse.data[0] || {
         business_name: 'Distribuidor Damian',
         headline: '',
         subheadline: '',
@@ -33,39 +39,102 @@ function LandingView() {
         email: '',
         address: '',
         is_active: true,
-      })
+      }
+      configRef.current = initialConfig
+      setConfig(initialConfig)
       setProducts(productsResponse.data)
     } catch {
-      setError('No se pudo cargar el catalogo. Vuelve a actualizar.')
+      setError('No se pudo cargar el catalogo. Comprueba la conexion.')
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
+    mounted.current = true
     load()
+    return () => {
+      mounted.current = false
+      clearTimeout(saveTimer.current)
+      flushConfig()
+    }
   }, [])
 
-  const updateConfig = (key, value) => setConfig((current) => ({ ...current, [key]: value }))
-
-  const saveConfig = async (event) => {
-    event.preventDefault()
-    setSaving(true)
-    setError('')
+  const flushConfig = async () => {
+    if (saveInFlight.current || !configRef.current || !Object.keys(pendingConfig.current).length) return
+    saveInFlight.current = true
+    if (mounted.current) setSaveStatus('Guardando...')
+    let failed = false
     try {
-      if (config.id) {
-        const response = await api.patch(`/landing/config/${config.id}/`, config)
-        setConfig(response.data)
-      } else {
-        const response = await api.post('/landing/config/', config)
-        setConfig(response.data)
+      while (Object.keys(pendingConfig.current).length) {
+        const changes = pendingConfig.current
+        pendingConfig.current = {}
+        try {
+          const current = configRef.current
+          const response = current.id
+            ? await api.patch(`/landing/config/${current.id}/`, changes)
+            : await api.post('/landing/config/', { ...current, ...changes })
+          configRef.current = { ...response.data, ...pendingConfig.current }
+          if (mounted.current) setConfig(configRef.current)
+        } catch (error) {
+          pendingConfig.current = { ...changes, ...pendingConfig.current }
+          throw error
+        }
       }
+      if (mounted.current) setSaveStatus('Cambios guardados')
     } catch {
-      setError('No se pudo guardar la informacion publica.')
+      failed = true
+      if (mounted.current) setSaveStatus('No se pudo guardar. Reintentando...')
     } finally {
-      setSaving(false)
+      saveInFlight.current = false
+      if (failed && mounted.current) saveTimer.current = setTimeout(flushConfig, 4000)
     }
   }
+
+  const updateConfig = (key, value) => {
+    configRevision.current += 1
+    configRef.current = { ...configRef.current, [key]: value }
+    pendingConfig.current = { ...pendingConfig.current, [key]: value }
+    setConfig(configRef.current)
+    setSaveStatus('Cambios pendientes...')
+    clearTimeout(saveTimer.current)
+    saveTimer.current = setTimeout(flushConfig, 600)
+  }
+
+  useEffect(() => {
+    if (loading || editing || creating || busyId !== null) return
+    let cancelled = false
+    let syncing = false
+    const sync = async () => {
+      if (document.hidden || syncing) return
+      syncing = true
+      try {
+        const response = await api.get('/catalogo/')
+        if (!cancelled) setProducts(response.data)
+        if (!saveInFlight.current && !Object.keys(pendingConfig.current).length) {
+          const revision = configRevision.current
+          const configResponse = await api.get('/landing/config/')
+          if (!cancelled && revision === configRevision.current && !saveInFlight.current && !Object.keys(pendingConfig.current).length && configResponse.data[0]) {
+            configRef.current = configResponse.data[0]
+            setConfig(configRef.current)
+          }
+        }
+      } catch {
+        // Keep the current view during brief network interruptions.
+      } finally {
+        syncing = false
+      }
+    }
+    const interval = setInterval(sync, 5000)
+    window.addEventListener('focus', sync)
+    document.addEventListener('visibilitychange', sync)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+      window.removeEventListener('focus', sync)
+      document.removeEventListener('visibilitychange', sync)
+    }
+  }, [loading, editing, creating, busyId])
 
   const toggleProduct = async (product, key) => {
     setBusyId(product.id)
@@ -101,7 +170,7 @@ function LandingView() {
       <Header
         title="Catalogo"
         subtitle="Productos publicados"
-        actions={<><button className="primary-button" onClick={() => setCreating(true)}><Plus size={16} /> Nuevo producto para el catalogo</button><button className="soft-button" onClick={load}><RefreshCcw size={16} /> Actualizar</button></>}
+        actions={<button className="primary-button" onClick={() => setCreating(true)}><Plus size={16} /> Nuevo producto para el catalogo</button>}
       />
 
       {error && <div className="form-error" role="alert">{error}</div>}
@@ -111,7 +180,7 @@ function LandingView() {
         <>
           <section className="table-card">
             <h2>Informacion publica</h2>
-            <form className="landing-form" onSubmit={saveConfig}>
+            <form className="landing-form" onBlur={flushConfig} onSubmit={event => { event.preventDefault(); flushConfig() }}>
               <label>
                 Nombre comercial
                 <input value={config.business_name || ''} onChange={(event) => updateConfig('business_name', event.target.value)} />
@@ -136,9 +205,7 @@ function LandingView() {
                 Direccion
                 <input value={config.address || ''} onChange={(event) => updateConfig('address', event.target.value)} />
               </label>
-              <button className="primary-button landing-save" disabled={saving}>
-                <Save size={16} /> {saving ? 'Guardando...' : 'Guardar catalogo'}
-              </button>
+              <span className="landing-wide" role="status" aria-live="polite">{saveStatus}</span>
             </form>
           </section>
 
@@ -180,10 +247,10 @@ function LandingView() {
           </section>
         </>
       ) : null}
-      {(creating || editing) && <CatalogEntryDrawer entry={editing} onClose={() => { setCreating(false); setEditing(null) }} onSaved={saved => {
+      {(creating || editing) && <CatalogEntryDrawer autoSave={Boolean(editing)} entry={editing} onClose={() => { setCreating(false); setEditing(null) }} onSaved={saved => {
         setProducts(current => [...current.filter(item => item.id !== saved.id), saved].sort((a, b) => a.name.localeCompare(b.name, 'es')))
-        setCreating(false)
-        setEditing(null)
+        if (editing) setEditing(saved)
+        else setCreating(false)
       }} />}
     </>
   )

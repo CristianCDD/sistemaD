@@ -3,11 +3,12 @@ import { Save, Trash2, X } from 'lucide-react'
 import { api } from '../services/api'
 import { prepareImageUpload } from '../utils/prepareImageUpload'
 
-export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode = false }) {
+export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode = false, autoSave = false }) {
   const [form, setForm] = useState({
     name: entry?.name || '', sku: entry?.sku || '', description: entry?.description || '',
     ...(!guideMode ? { category: entry?.category || '' } : {}),
   })
+  const savedForm = useRef(JSON.stringify(form))
   const [images, setImages] = useState(entry?.catalog_images_data || [])
   const [files, setFiles] = useState([])
   const previewUrls = useRef(new Set())
@@ -38,7 +39,17 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode 
   const [saving, setSaving] = useState(false)
   const [saveStatus, setSaveStatus] = useState('')
   const [error, setError] = useState('')
-  const update = (key, value) => setForm(current => ({ ...current, [key]: value }))
+  const update = (key, value) => {
+    setError('')
+    setForm(current => ({ ...current, [key]: value }))
+  }
+
+  useEffect(() => {
+    if (!autoSave || !entry?.id || saving || error || !form.name.trim()) return
+    if (JSON.stringify(form) === savedForm.current && !files.length && !deleted.length) return
+    const timer = setTimeout(() => save({ preventDefault() {} }), 700)
+    return () => clearTimeout(timer)
+  }, [autoSave, entry?.id, form, files, deleted, saving, error])
 
   const save = async event => {
     event.preventDefault()
@@ -46,6 +57,7 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode 
     setSaving(true)
     setSaveStatus(files.length ? 'Preparando imagenes...' : 'Guardando...')
     setError('')
+    const submittedForm = JSON.stringify(form)
     const payload = new FormData()
     Object.entries(form).forEach(([key, value]) => payload.append(key, value))
     if (!entry?.id) {
@@ -68,10 +80,17 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode 
       const response = entry?.id
         ? await api.patch(`${endpoint}${entry.id}/`, payload, options)
         : await api.post(endpoint, payload, options)
+      savedForm.current = submittedForm
+      setImages(response.data.catalog_images_data || [])
+      setFiles([])
+      setDeleted([])
+      setSaveStatus('Cambios guardados')
       onSaved(response.data)
+      return true
     } catch (err) {
       const details = err.response?.data
       setError(details ? Object.entries(details).map(([key, value]) => `${key}: ${value}`).join(' ') : 'No se pudo guardar la ficha.')
+      return false
     } finally {
       setSaving(false)
     }
@@ -81,7 +100,12 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode 
     <div className="drawer-head"><h2>{guideMode
       ? entry ? 'Editar producto de la guia' : 'Anadir nuevo producto para la guia'
       : entry ? 'Editar producto del catalogo' : 'Nuevo producto para el catalogo'}</h2>
-      <button className="icon-button" disabled={saving} onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
+      <button className="icon-button" disabled={saving} onClick={async () => {
+        if (autoSave && entry?.id && (JSON.stringify(form) !== savedForm.current || files.length || deleted.length)) {
+          if (!await save({ preventDefault() {} })) return
+        }
+        onClose()
+      }} aria-label="Cerrar"><X size={18} /></button>
     </div>
     <form className="drawer-form" onSubmit={save}>
       <div className="form-grid">
@@ -104,7 +128,9 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode 
       <span>{images.length + files.length} imagen(es){files.length > 0 ? ` (${files.length} nueva(s))` : ''}</span>
       </div>}
       {error && <div className="form-error" role="alert">{error}</div>}
-      <button className="primary-button" disabled={saving} aria-live="polite"><Save size={16} />{saving ? saveStatus : 'Guardar producto'}</button>
+      {autoSave && entry?.id && !error
+        ? <span role="status" aria-live="polite">{saving ? saveStatus : JSON.stringify(form) !== savedForm.current || files.length || deleted.length ? 'Cambios pendientes...' : saveStatus}</span>
+        : <button className="primary-button" disabled={saving} aria-live="polite"><Save size={16} />{saving ? saveStatus : error ? 'Reintentar guardado' : 'Guardar producto'}</button>}
     </form>
   </aside></div>
 }
