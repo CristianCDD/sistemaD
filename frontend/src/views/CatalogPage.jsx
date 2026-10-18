@@ -44,10 +44,32 @@ function CatalogPage() {
   const [selectedCategory, setSelectedCategory] = useState('Todas las categorias')
 
   useEffect(() => {
-    fetch(`${API_URL}/public/landing/`)
-      .then((response) => response.json())
-      .then((data) => setPublicProducts(data.products || []))
-      .catch(() => setPublicProducts([]))
+    let cancelled = false
+    let syncing = false
+    const sync = async () => {
+      if (document.hidden || syncing) return
+      syncing = true
+      try {
+        const response = await fetch(`${API_URL}/public/landing/`, { cache: 'no-store' })
+        if (!response.ok) return
+        const data = await response.json()
+        if (!cancelled) setPublicProducts(data.products || [])
+      } catch {
+        // Preserve the visible catalog when the connection briefly fails.
+      } finally {
+        syncing = false
+      }
+    }
+    sync()
+    const interval = setInterval(sync, 5000)
+    window.addEventListener('focus', sync)
+    document.addEventListener('visibilitychange', sync)
+    return () => {
+      cancelled = true
+      clearInterval(interval)
+      window.removeEventListener('focus', sync)
+      document.removeEventListener('visibilitychange', sync)
+    }
   }, [])
 
   const selectedImages = selectedProduct?.images || []
