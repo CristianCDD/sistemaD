@@ -5,22 +5,6 @@ import MovementEditor from '../components/MovementEditor'
 import { api } from '../services/api'
 import { movementLabel, movementQuantity } from '../utils/format'
 
-const toImageItems = (items, fallbackUrl = '', legacyType = '') => {
-  if (items?.length) {
-    return items.map((item, index) => ({
-      id: item.id,
-      url: item.url,
-      key: item.id ? `saved-${item.id}` : `legacy-${index}-${item.url}`,
-      legacyType: item.id ? '' : legacyType,
-      isNew: false,
-    }))
-  }
-  if (fallbackUrl) {
-    return [{ id: null, url: fallbackUrl, key: `legacy-${fallbackUrl}`, legacyType, isNew: false }]
-  }
-  return []
-}
-
 function ProductDrawer({
   product = null,
   onClose,
@@ -36,16 +20,7 @@ function ProductDrawer({
     name: product?.name || '',
     sku: product?.sku || '',
     cost: product?.cost || '',
-    description: product?.description || '',
   })
-  const [catalogImages, setCatalogImages] = useState(toImageItems(product?.catalog_images_data, product?.landing_image_url, 'catalog'))
-  const [materialImages, setMaterialImages] = useState(toImageItems(product?.material_images_data, product?.material_image_url, 'material'))
-  const [deletedCatalogImageIds, setDeletedCatalogImageIds] = useState([])
-  const [deletedMaterialImageIds, setDeletedMaterialImageIds] = useState([])
-  const [clearCatalogLegacy, setClearCatalogLegacy] = useState(false)
-  const [clearMaterialLegacy, setClearMaterialLegacy] = useState(false)
-  const [catalogInputKey, setCatalogInputKey] = useState(0)
-  const [materialInputKey, setMaterialInputKey] = useState(0)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [activeTab, setActiveTab] = useState(startingTab)
@@ -55,44 +30,6 @@ function ProductDrawer({
   const [deletingMovementId, setDeletingMovementId] = useState(null)
 
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }))
-
-  const appendImages = (files, setImages) => {
-    const selectedFiles = Array.from(files || [])
-    if (!selectedFiles.length) return
-
-    setImages((current) => {
-      const selectedKeys = new Set(current.map((item) => item.file ? `${item.file.name}-${item.file.size}-${item.file.lastModified}` : item.key))
-      const newFiles = selectedFiles.filter((file) => {
-        const key = `${file.name}-${file.size}-${file.lastModified}`
-        if (selectedKeys.has(key)) return false
-        selectedKeys.add(key)
-        return true
-      })
-
-      return [
-        ...current,
-        ...newFiles.map((file) => ({
-          id: null,
-          file,
-          url: URL.createObjectURL(file),
-          key: `new-${file.name}-${file.size}-${file.lastModified}`,
-          isNew: true,
-        })),
-      ]
-    })
-  }
-
-  const removeImage = (key, setImages, setDeletedIds, setClearLegacy) => {
-    setImages((current) => {
-      const target = current.find((item) => item.key === key)
-      if (target?.id) {
-        setDeletedIds((ids) => [...ids, target.id])
-      } else if (target?.legacyType) {
-        setClearLegacy(true)
-      }
-      return current.filter((item) => item.key !== key)
-    })
-  }
 
   const movementTotals = useMemo(() => {
     return movements.reduce((totals, movement) => {
@@ -140,12 +77,6 @@ function ProductDrawer({
     payload.append('minimum_stock', '0')
     payload.append('manages_stock', 'true')
     payload.append('is_active', 'true')
-    catalogImages.filter((item) => item.isNew).forEach((item) => payload.append('catalog_images', item.file))
-    materialImages.filter((item) => item.isNew).forEach((item) => payload.append('material_images', item.file))
-    deletedCatalogImageIds.forEach((id) => payload.append('delete_catalog_image_ids', id))
-    deletedMaterialImageIds.forEach((id) => payload.append('delete_material_image_ids', id))
-    if (clearCatalogLegacy) payload.append('clear_landing_image', 'true')
-    if (clearMaterialLegacy) payload.append('clear_material_image', 'true')
 
     try {
       let response
@@ -154,14 +85,6 @@ function ProductDrawer({
       } else {
         response = await api.patch(`/productos/${product.id}/`, payload)
       }
-      setCatalogImages(toImageItems(response.data.catalog_images_data, response.data.landing_image_url, 'catalog'))
-      setMaterialImages(toImageItems(response.data.material_images_data, response.data.material_image_url, 'material'))
-      setDeletedCatalogImageIds([])
-      setDeletedMaterialImageIds([])
-      setClearCatalogLegacy(false)
-      setClearMaterialLegacy(false)
-      setCatalogInputKey((value) => value + 1)
-      setMaterialInputKey((value) => value + 1)
       onSaved(response.data)
     } catch (requestError) {
       const detail = requestError.response?.data?.detail
@@ -218,70 +141,6 @@ function ProductDrawer({
             <h3>Datos base de inventario</h3>
             <div className="form-grid">
               <label>Precio inventario<input value={form.cost || ''} onChange={(event) => update('cost', event.target.value)} /></label>
-            </div>
-            <h3>Detalles</h3>
-            <label>Descripcion<textarea value={form.description} onChange={(event) => update('description', event.target.value)} /></label>
-            <div className="image-purpose-grid">
-              <label>
-                Imagenes del producto
-                <small>Referencia interna del producto.</small>
-                <input key={catalogInputKey} type="file" accept="image/*" multiple onChange={(event) => appendImages(event.target.files, setCatalogImages)} />
-              </label>
-              <label>
-                Imagenes para guia de materiales
-                <small>Fotos rapidas para trabajadores al cargar o identificar material. Puedes seleccionar mas de una.</small>
-                <input key={materialInputKey} type="file" accept="image/*" multiple onChange={(event) => appendImages(event.target.files, setMaterialImages)} />
-              </label>
-            </div>
-            <div className="image-preview-grid">
-              {catalogImages.length > 0 && (
-                <div className="product-image-preview product-image-preview-list">
-                  <div className="product-preview-strip">
-                    {catalogImages.map((item, index) => (
-                      <div className="product-preview-tile" key={item.key}>
-                        <img src={item.url} alt={`${form.name || 'Imagen para catalogo'} ${index + 1}`} />
-                        <button
-                          className="preview-delete"
-                          onClick={() => removeImage(item.key, setCatalogImages, setDeletedCatalogImageIds, setClearCatalogLegacy)}
-                          title="Quitar imagen"
-                          type="button"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <span>
-                    {catalogImages.filter((item) => item.isNew).length
-                      ? `${catalogImages.filter((item) => item.isNew).length} nueva(s) imagen(es) para catalogo`
-                      : `${catalogImages.length} imagen(es) actuales de catalogo`}
-                  </span>
-                </div>
-              )}
-              {materialImages.length > 0 && (
-                <div className="product-image-preview product-image-preview-list">
-                  <div className="product-preview-strip">
-                    {materialImages.map((item, index) => (
-                      <div className="product-preview-tile" key={item.key}>
-                        <img src={item.url} alt={`${form.name || 'Imagen para guia de materiales'} ${index + 1}`} />
-                        <button
-                          className="preview-delete"
-                          onClick={() => removeImage(item.key, setMaterialImages, setDeletedMaterialImageIds, setClearMaterialLegacy)}
-                          title="Quitar imagen"
-                          type="button"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                  <span>
-                    {materialImages.filter((item) => item.isNew).length
-                      ? `${materialImages.filter((item) => item.isNew).length} nueva(s) imagen(es) para materiales`
-                      : `${materialImages.length} imagen(es) actuales de materiales`}
-                  </span>
-                </div>
-              )}
             </div>
             {error && <div className="form-error">{error}</div>}
             <button className="primary-button" disabled={saving}><Save size={16} /> {saving ? 'Guardando...' : isNew ? 'Crear producto' : 'Guardar cambios'}</button>

@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react'
 import { Save, Trash2, X } from 'lucide-react'
 import { api } from '../services/api'
 
-export default function CatalogEntryDrawer({ entry, onClose, onSaved }) {
+export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode = false }) {
   const [form, setForm] = useState({
     name: entry?.name || '', sku: entry?.sku || '', description: entry?.description || '',
-    category: entry?.category || '',
+    ...(!guideMode ? { category: entry?.category || '' } : {}),
   })
   const [images, setImages] = useState(entry?.catalog_images_data || [])
   const [files, setFiles] = useState([])
@@ -41,15 +41,16 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved }) {
     const payload = new FormData()
     Object.entries(form).forEach(([key, value]) => payload.append(key, value))
     if (!entry?.id) {
-      payload.append('show_on_landing', 'true')
+      if (!guideMode) payload.append('show_on_landing', 'true')
       payload.append('is_active', 'true')
     }
     files.forEach(item => payload.append('images', item.file))
     deleted.forEach(id => payload.append('delete_image_ids', id))
     try {
+      const endpoint = guideMode ? '/guia-materiales/' : '/catalogo/'
       const response = entry?.id
-        ? await api.patch(`/catalogo/${entry.id}/`, payload)
-        : await api.post('/catalogo/', payload)
+        ? await api.patch(`${endpoint}${entry.id}/`, payload)
+        : await api.post(endpoint, payload)
       onSaved(response.data)
     } catch (err) {
       const details = err.response?.data
@@ -60,14 +61,16 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved }) {
   }
 
   return <div className="drawer-backdrop"><aside className="drawer">
-    <div className="drawer-head"><h2>{entry ? 'Editar ficha de catalogo' : 'Nueva ficha de catalogo'}</h2>
+    <div className="drawer-head"><h2>{guideMode
+      ? entry ? 'Editar producto de la guia' : 'Anadir nuevo producto para la guia'
+      : entry ? 'Editar producto del catalogo' : 'Nuevo producto para el catalogo'}</h2>
       <button className="icon-button" onClick={onClose} aria-label="Cerrar"><X size={18} /></button>
     </div>
     <form className="drawer-form" onSubmit={save}>
       <div className="form-grid">
         <label>Nombre comercial<input required maxLength={160} value={form.name} onChange={e => update('name', e.target.value)} /></label>
         <label>Codigo<input maxLength={80} value={form.sku} onChange={e => update('sku', e.target.value)} /></label>
-        <label>Categoria<input maxLength={120} value={form.category} onChange={e => update('category', e.target.value)} /></label>
+        {!guideMode && <label>Categoria<input maxLength={120} value={form.category} onChange={e => update('category', e.target.value)} /></label>}
       </div>
       <label>Descripcion<textarea value={form.description} onChange={e => update('description', e.target.value)} /></label>
       <label>Imagenes<input type="file" accept="image/*" multiple onChange={appendFiles} /></label>
@@ -81,10 +84,10 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved }) {
         <button type="button" className="preview-delete" title="Quitar imagen" aria-label={`Quitar ${item.file.name}`} onClick={() => removeFile(item.url)}><Trash2 size={14} /></button>
       </div>)}
       </div>
-      <span>{images.length + files.length} imagen(es) de catalogo{files.length > 0 ? ` (${files.length} nueva(s))` : ''}</span>
+      <span>{images.length + files.length} imagen(es){files.length > 0 ? ` (${files.length} nueva(s))` : ''}</span>
       </div>}
       {error && <div className="form-error" role="alert">{error}</div>}
-      <button className="primary-button" disabled={saving}><Save size={16} />{saving ? 'Guardando...' : 'Guardar ficha'}</button>
+      <button className="primary-button" disabled={saving}><Save size={16} />{saving ? 'Guardando...' : 'Guardar producto'}</button>
     </form>
   </aside></div>
 }

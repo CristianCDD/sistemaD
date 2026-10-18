@@ -5,6 +5,8 @@ from rest_framework.response import Response
 from .models import Category, Product
 from .models import CatalogEntry
 from .catalog_serializers import CatalogEntrySerializer, PublicCatalogEntrySerializer
+from .models import MaterialGuideEntry
+from .catalog_serializers import MaterialGuideEntrySerializer, PublicMaterialGuideEntrySerializer
 from .serializers import (
     CategorySerializer,
     ProductSerializer,
@@ -54,9 +56,15 @@ class PublicProductViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
+class MaterialGuideEntryViewSet(viewsets.ModelViewSet):
+    queryset = MaterialGuideEntry.objects.prefetch_related('images').all()
+    serializer_class = MaterialGuideEntrySerializer
+    search_fields = ['name', 'sku', 'description']
+
+
 class PublicMaterialGuideViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Product.objects.filter(is_active=True).prefetch_related('material_images').order_by('name')
-    serializer_class = PublicMaterialGuideSerializer
+    queryset = MaterialGuideEntry.objects.filter(is_active=True).prefetch_related('images')
+    serializer_class = PublicMaterialGuideEntrySerializer
     permission_classes = [permissions.AllowAny]
 
 # Create your views here.

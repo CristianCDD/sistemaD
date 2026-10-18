@@ -101,7 +101,7 @@ function LandingView() {
       <Header
         title="Catalogo"
         subtitle="Productos publicados"
-        actions={<><button className="primary-button" onClick={() => setCreating(true)}><Plus size={16} /> Nueva ficha</button><button className="soft-button" onClick={load}><RefreshCcw size={16} /> Actualizar</button></>}
+        actions={<><button className="primary-button" onClick={() => setCreating(true)}><Plus size={16} /> Nuevo producto para el catalogo</button><button className="soft-button" onClick={load}><RefreshCcw size={16} /> Actualizar</button></>}
       />
 
       {error && <div className="form-error" role="alert">{error}</div>}

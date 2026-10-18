@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, ChevronLeft, ChevronRight, ImageOff, RefreshCcw, X } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, ChevronRight, Edit3, ImageOff, Plus, RefreshCcw, Trash2, X } from 'lucide-react'
 
 import Header from '../components/Header'
 import SearchBox from '../components/SearchBox'
 import { api } from '../services/api'
+import CatalogEntryDrawer from './CatalogEntryDrawer'
 
 const materialImages = (product) => product.material_image_urls?.length ? product.material_image_urls : product.image_url ? [product.image_url] : []
 
@@ -13,12 +14,22 @@ function MaterialGuideView({ publicMode = false }) {
   const [loading, setLoading] = useState(true)
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [editing, setEditing] = useState(null)
+  const [creating, setCreating] = useState(false)
+  const [error, setError] = useState('')
+  const [deleting, setDeleting] = useState(false)
 
   const load = async () => {
     setLoading(true)
-    const response = await api.get(publicMode ? '/public/guia-materiales/' : '/productos/')
-    setProducts(response.data.sort((a, b) => a.name.localeCompare(b.name, 'es')))
-    setLoading(false)
+    setError('')
+    try {
+      const response = await api.get(publicMode ? '/public/guia-materiales/' : '/guia-materiales/')
+      setProducts(response.data.sort((a, b) => a.name.localeCompare(b.name, 'es')))
+    } catch {
+      setError('No se pudo cargar la guia. Vuelve a actualizar.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -52,6 +63,20 @@ function MaterialGuideView({ publicMode = false }) {
     setSelectedImageIndex((current) => (current + direction + selectedImages.length) % selectedImages.length)
   }
 
+  const deleteGuideProduct = async () => {
+    if (!window.confirm(`Eliminar "${selectedProduct.name}" solo de la guia de materiales?`)) return
+    setDeleting(true)
+    try {
+      await api.delete(`/guia-materiales/${selectedProduct.id}/`)
+      setProducts(current => current.filter(product => product.id !== selectedProduct.id))
+      closeProduct()
+    } catch {
+      setError('No se pudo eliminar el producto de la guia.')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   const content = (
     <>
       <Header
@@ -63,8 +88,10 @@ function MaterialGuideView({ publicMode = false }) {
       <section className="table-card">
         <div className="table-toolbar">
           <strong>{filtered.length} materiales</strong>
+          {!publicMode && <button className="primary-button" onClick={() => setCreating(true)}><Plus size={16} /> Anadir nuevo producto para la guia</button>}
           <button className="soft-button" onClick={load}><RefreshCcw size={16} /> Actualizar</button>
         </div>
+        {error && <div className="form-error" role="alert">{error}</div>}
 
         {loading ? (
           <div className="empty-state">Cargando guia de materiales...</div>
@@ -112,6 +139,11 @@ function MaterialGuideView({ publicMode = false }) {
                 <strong>{selectedProduct.sku || 'Sin codigo'}</strong>
               </div>
             </div>
+            {selectedProduct.description && <p>{selectedProduct.description}</p>}
+            {!publicMode && <div className="row-actions">
+              <button className="soft-button" onClick={() => { setEditing(selectedProduct); closeProduct() }}><Edit3 size={16} /> Editar producto</button>
+              <button className="soft-button" disabled={deleting} onClick={deleteGuideProduct}><Trash2 size={16} /> Eliminar de la guia</button>
+            </div>}
             <div className="material-modal-image">
               {selectedImage ? (
                 <div className="image-carousel">
@@ -140,6 +172,13 @@ function MaterialGuideView({ publicMode = false }) {
           </section>
         </div>
       )}
+      {!publicMode && (creating || editing) && <CatalogEntryDrawer guideMode entry={editing}
+        onClose={() => { setCreating(false); setEditing(null) }}
+        onSaved={saved => {
+          setProducts(current => [...current.filter(product => product.id !== saved.id), saved].sort((a, b) => a.name.localeCompare(b.name, 'es')))
+          setCreating(false)
+          setEditing(null)
+        }} />}
     </>
   )
 

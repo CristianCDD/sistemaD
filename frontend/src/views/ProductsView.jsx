@@ -46,7 +46,7 @@ function ProductsView() {
   }
 
   const deleteProduct = async (product) => {
-    const confirmed = window.confirm(`Estas seguro de eliminar "${product.name}"? Tambien se eliminaran sus movimientos de stock.`)
+    const confirmed = window.confirm(`Estas seguro de eliminar "${product.name}" del inventario? Tambien se eliminaran sus movimientos de stock. Sus productos e imagenes en catalogo y guia se conservaran.`)
     if (!confirmed) return
 
     setDeletingProductId(product.id)
@@ -100,7 +100,7 @@ function ProductsView() {
     <>
       <Header
         title="Productos"
-        subtitle="Edita la ficha del producto: nombre, codigo, descripcion y precio de inventario."
+        subtitle="Control de inventario: nombre, codigo y precio de inventario."
         actions={<SearchBox value={query} onChange={setQuery} placeholder="Buscar por nombre o codigo" />}
       />
       <div className="table-card">

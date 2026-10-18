@@ -1,7 +1,7 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from .models import CatalogEntry, CatalogEntryImage
+from .models import CatalogEntry, MaterialGuideEntry
 
 
 class CatalogEntrySerializer(serializers.ModelSerializer):
@@ -40,7 +40,7 @@ class CatalogEntrySerializer(serializers.ModelSerializer):
         if deleted:
             entry.images.filter(id__in=deleted).delete()
         for image in request.FILES.getlist('images'):
-            CatalogEntryImage.objects.create(entry=entry, image=image)
+            entry.images.create(image=image)
 
     @transaction.atomic
     def create(self, validated_data):
@@ -59,3 +59,20 @@ class PublicCatalogEntrySerializer(CatalogEntrySerializer):
     class Meta(CatalogEntrySerializer.Meta):
         fields = ['id', 'name', 'sku', 'description', 'category', 'tags',
                   'catalog_images_data', 'catalog_image_urls', 'image_url', 'display_price']
+
+
+class MaterialGuideEntrySerializer(CatalogEntrySerializer):
+    material_image_urls = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MaterialGuideEntry
+        fields = ['id', 'product', 'name', 'sku', 'description', 'is_active',
+                  'catalog_images_data', 'image_url', 'material_image_urls']
+
+    def get_material_image_urls(self, obj):
+        return self.get_catalog_image_urls(obj)
+
+
+class PublicMaterialGuideEntrySerializer(MaterialGuideEntrySerializer):
+    class Meta(MaterialGuideEntrySerializer.Meta):
+        fields = ['id', 'name', 'sku', 'description', 'image_url', 'material_image_urls']

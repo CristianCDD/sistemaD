@@ -86,6 +86,28 @@ class CatalogEntryImage(models.Model):
         ordering = ['id']
 
 
+class MaterialGuideEntry(models.Model):
+    product = models.ForeignKey(Product, blank=True, null=True, on_delete=models.SET_NULL, related_name='guide_entries')
+    name = models.CharField(max_length=160)
+    sku = models.CharField(max_length=80, blank=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class MaterialGuideEntryImage(models.Model):
+    entry = models.ForeignKey(MaterialGuideEntry, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='guia-materiales/')
+
+    class Meta:
+        ordering = ['id']
+
+
 class ProductCatalogImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='catalog_images')
     image = models.ImageField(upload_to='productos/catalogo/')

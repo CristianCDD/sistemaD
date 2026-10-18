@@ -2,6 +2,19 @@ from django.contrib import admin
 
 from .models import Category, Product, ProductCatalogImage, ProductMaterialImage
 from .models import CatalogEntry, CatalogEntryImage
+from .models import MaterialGuideEntry, MaterialGuideEntryImage
+
+
+class MaterialGuideEntryImageInline(admin.TabularInline):
+    model = MaterialGuideEntryImage
+    extra = 0
+
+
+@admin.register(MaterialGuideEntry)
+class MaterialGuideEntryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'sku', 'is_active']
+    search_fields = ['name', 'sku']
+    inlines = [MaterialGuideEntryImageInline]
 
 
 class CatalogEntryImageInline(admin.TabularInline):

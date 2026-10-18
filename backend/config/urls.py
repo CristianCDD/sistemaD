@@ -24,6 +24,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from accounts.views import MeView, UserProfileViewSet
 from catalog.views import CategoryViewSet, ProductViewSet, PublicMaterialGuideViewSet, PublicProductViewSet
 from catalog.views import CatalogEntryViewSet
+from catalog.views import MaterialGuideEntryViewSet
 from inventory.views import DailyListImageViewSet, StockMovementViewSet, StockSummaryView
 from landing.views import LandingConfigViewSet, LandingImageViewSet, PublicLandingView
 
@@ -31,6 +32,7 @@ router = DefaultRouter()
 router.register('categorias', CategoryViewSet, basename='categorias')
 router.register('productos', ProductViewSet, basename='productos')
 router.register('catalogo', CatalogEntryViewSet, basename='catalogo')
+router.register('guia-materiales', MaterialGuideEntryViewSet, basename='guia-materiales')
 router.register('movimientos-stock', StockMovementViewSet, basename='movimientos-stock')
 router.register('listas-calendario', DailyListImageViewSet, basename='listas-calendario')
 router.register('usuarios/perfiles', UserProfileViewSet, basename='usuarios-perfiles')
