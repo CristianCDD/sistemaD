@@ -223,8 +223,8 @@ function ProductDrawer({
             <label>Descripcion<textarea value={form.description} onChange={(event) => update('description', event.target.value)} /></label>
             <div className="image-purpose-grid">
               <label>
-                Imagenes para catalogo
-                <small>Fotos presentables para clientes en la pagina publica. Puedes seleccionar mas de una.</small>
+                Imagenes del producto
+                <small>Referencia interna del producto.</small>
                 <input key={catalogInputKey} type="file" accept="image/*" multiple onChange={(event) => appendImages(event.target.files, setCatalogImages)} />
               </label>
               <label>

@@ -2,8 +2,8 @@ from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from catalog.models import Product
-from catalog.serializers import PublicProductSerializer
+from catalog.models import CatalogEntry
+from catalog.catalog_serializers import PublicCatalogEntrySerializer
 from .models import LandingConfig, LandingImage
 from .serializers import LandingConfigSerializer, LandingImageSerializer
 
@@ -24,13 +24,13 @@ class PublicLandingView(APIView):
     def get(self, request):
         config = LandingConfig.objects.filter(is_active=True).order_by('-id').first()
         images = LandingImage.objects.filter(is_active=True)
-        products = Product.objects.filter(is_active=True, show_on_landing=True).select_related('category').prefetch_related('catalog_images')
+        products = CatalogEntry.objects.filter(is_active=True, show_on_landing=True).prefetch_related('images')
 
         return Response(
             {
                 'config': LandingConfigSerializer(config).data if config else None,
                 'images': LandingImageSerializer(images, many=True, context={'request': request}).data,
-                'products': PublicProductSerializer(products, many=True, context={'request': request}).data,
+                'products': PublicCatalogEntrySerializer(products, many=True, context={'request': request}).data,
             }
         )
 

@@ -1,6 +1,20 @@
 from django.contrib import admin
 
 from .models import Category, Product, ProductCatalogImage, ProductMaterialImage
+from .models import CatalogEntry, CatalogEntryImage
+
+
+class CatalogEntryImageInline(admin.TabularInline):
+    model = CatalogEntryImage
+    extra = 0
+
+
+@admin.register(CatalogEntry)
+class CatalogEntryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'origin', 'show_on_landing', 'is_active']
+    search_fields = ['name', 'sku', 'category']
+    list_filter = ['origin', 'show_on_landing', 'is_active']
+    inlines = [CatalogEntryImageInline]
 
 
 @admin.register(Category)

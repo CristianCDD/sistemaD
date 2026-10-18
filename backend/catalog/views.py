@@ -3,6 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Category, Product
+from .models import CatalogEntry
+from .catalog_serializers import CatalogEntrySerializer, PublicCatalogEntrySerializer
 from .serializers import (
     CategorySerializer,
     ProductSerializer,
@@ -30,12 +32,19 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
+class CatalogEntryViewSet(viewsets.ModelViewSet):
+    queryset = CatalogEntry.objects.prefetch_related('images').all()
+    serializer_class = CatalogEntrySerializer
+    filterset_fields = ['origin', 'show_on_landing', 'is_active']
+    search_fields = ['name', 'sku', 'description', 'category']
+
+
 class PublicProductViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Product.objects.select_related('category').filter(
+    queryset = CatalogEntry.objects.filter(
         is_active=True,
         show_on_landing=True,
-    ).prefetch_related('catalog_images')
-    serializer_class = PublicProductSerializer
+    ).prefetch_related('images')
+    serializer_class = PublicCatalogEntrySerializer
     permission_classes = [permissions.AllowAny]
 
     @action(detail=False, methods=['get'], url_path='resumen')

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Award, Box, ChevronDown, ChevronLeft, ChevronRight, Headphones, MapPin, MessageCircle, PackageCheck, Phone, Search, Truck, X } from 'lucide-react'
 
 import { API_URL } from '../services/api'
+import { money } from '../utils/format'
 import foamImage from '../assets/catalog/ojalillos.png'
 import ojalillosImage from '../assets/catalog/pavonado.png'
 import pvcImage from '../assets/catalog/vinil-imantado.png'
@@ -13,7 +14,7 @@ const productImages = (product) => product.catalog_image_urls?.length ? product.
 const productCategory = (product) => product.category || product.categoria || product.type || product.tipo || 'Materiales'
 
 const productTags = (product) => {
-  const values = [product.unit, product.unidad].filter(Boolean)
+  const values = [product.tags, product.unit, product.unidad].filter(Boolean)
   return values.slice(0, 3)
 }
 
@@ -73,6 +74,7 @@ function CatalogPage() {
       title: product.name,
       category: productCategory(product),
       description,
+      price: product.display_price,
       tags: productTags(product),
       imageIndex: cardImageIndex(product),
     })
@@ -209,6 +211,7 @@ function CatalogPage() {
                 <div className="catalog-product-info">
                   <strong>{product.name}</strong>
                   {description && <p>{description}</p>}
+                  {product.display_price != null && <p>{money(product.display_price)}</p>}
                   {tags.length > 0 && (
                     <div className="catalog-product-tags">
                       {tags.map((tag, index) => <span key={`${tag}-${index}`}>{tag}</span>)}
@@ -276,6 +279,7 @@ function CatalogPage() {
               <span>{selectedProduct.category}</span>
               <h2>{selectedProduct.title}</h2>
               {selectedProduct.description && <p>{selectedProduct.description}</p>}
+              {selectedProduct.price != null && <p>{money(selectedProduct.price)}</p>}
               {selectedProduct.tags.length > 0 && (
                 <div className="catalog-product-tags">
                   {selectedProduct.tags.map((tag, index) => <small key={`${tag}-${index}`}>{tag}</small>)}
