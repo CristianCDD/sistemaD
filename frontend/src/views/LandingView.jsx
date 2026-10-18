@@ -151,7 +151,6 @@ function LandingView() {
                   <tr>
                     <th>Producto</th>
                     <th>Codigo</th>
-                    <th>Origen</th>
                     <th>Mostrar</th>
                     <th>Acciones</th>
                   </tr>
@@ -163,7 +162,6 @@ function LandingView() {
                         <strong>{product.name}</strong>
                       </td>
                       <td>{product.sku || '-'}</td>
-                      <td>{product.origin === 'local' ? 'Compra local' : product.origin === 'importado' ? 'Importado' : 'Sin definir'}</td>
                       <td>
                         <button disabled={busyId === product.id} className={product.show_on_landing && product.is_active ? 'toggle-chip on' : 'toggle-chip'} onClick={() => toggleProduct(product, 'show_on_landing')}>
                           {product.show_on_landing && product.is_active ? 'Visible' : 'Oculto'}
@@ -175,7 +173,7 @@ function LandingView() {
                       </div></td>
                     </tr>
                   ))}
-                  {!filtered.length && <tr><td colSpan={5}>Sin fichas para mostrar</td></tr>}
+                  {!filtered.length && <tr><td colSpan={4}>Sin fichas para mostrar</td></tr>}
                 </tbody>
               </table>
             </div>
