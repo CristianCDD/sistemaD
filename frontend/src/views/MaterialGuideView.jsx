@@ -125,8 +125,8 @@ function MaterialGuideView({ publicMode = false }) {
       </section>
       {selectedProduct && (
         <div className="material-modal-backdrop" onClick={closeProduct}>
-          <section className="material-modal" onClick={(event) => event.stopPropagation()}>
-            <button className="icon-button material-modal-close" onClick={closeProduct} type="button">
+          <section className={`material-modal${selectedImage ? '' : ' material-modal-no-image'}`} role="dialog" aria-modal="true" aria-label={selectedProduct.name} onClick={(event) => event.stopPropagation()}>
+            <button className="icon-button material-modal-close" onClick={closeProduct} type="button" aria-label="Cerrar material">
               <X size={18} />
             </button>
             <div className="material-modal-info">
@@ -139,11 +139,7 @@ function MaterialGuideView({ publicMode = false }) {
                 <strong>{selectedProduct.sku || 'Sin codigo'}</strong>
               </div>
             </div>
-            {selectedProduct.description && <p>{selectedProduct.description}</p>}
-            {!publicMode && <div className="row-actions">
-              <button className="soft-button" onClick={() => { setEditing(selectedProduct); closeProduct() }}><Edit3 size={16} /> Editar producto</button>
-              <button className="soft-button" disabled={deleting} onClick={deleteGuideProduct}><Trash2 size={16} /> Eliminar de la guia</button>
-            </div>}
+            {selectedProduct.description && <p className="material-modal-description">{selectedProduct.description}</p>}
             <div className="material-modal-image">
               {selectedImage ? (
                 <div className="image-carousel">
@@ -169,6 +165,10 @@ function MaterialGuideView({ publicMode = false }) {
                 </div>
               )}
             </div>
+            {!publicMode && <div className="material-modal-actions">
+              <button className="soft-button" onClick={() => { setEditing(selectedProduct); closeProduct() }}><Edit3 size={16} /> Editar producto</button>
+              <button className="soft-button" disabled={deleting} onClick={deleteGuideProduct}><Trash2 size={16} /> Eliminar de la guia</button>
+            </div>}
           </section>
         </div>
       )}
