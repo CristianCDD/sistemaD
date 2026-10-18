@@ -5,8 +5,7 @@ import { api } from '../services/api'
 export default function CatalogEntryDrawer({ entry, onClose, onSaved }) {
   const [form, setForm] = useState({
     name: entry?.name || '', sku: entry?.sku || '', description: entry?.description || '',
-    category: entry?.category || '', show_on_landing: entry?.show_on_landing ?? false,
-    is_active: entry?.is_active ?? true,
+    category: entry?.category || '',
   })
   const [images, setImages] = useState(entry?.catalog_images_data || [])
   const [files, setFiles] = useState([])
@@ -41,6 +40,10 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved }) {
     setError('')
     const payload = new FormData()
     Object.entries(form).forEach(([key, value]) => payload.append(key, value))
+    if (!entry?.id) {
+      payload.append('show_on_landing', 'true')
+      payload.append('is_active', 'true')
+    }
     files.forEach(item => payload.append('images', item.file))
     deleted.forEach(id => payload.append('delete_image_ids', id))
     try {
@@ -67,8 +70,6 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved }) {
         <label>Categoria<input maxLength={120} value={form.category} onChange={e => update('category', e.target.value)} /></label>
       </div>
       <label>Descripcion<textarea value={form.description} onChange={e => update('description', e.target.value)} /></label>
-      <label className="checkbox-line"><input type="checkbox" checked={form.show_on_landing} onChange={e => update('show_on_landing', e.target.checked)} /> Mostrar en catalogo</label>
-      <label className="checkbox-line"><input type="checkbox" checked={form.is_active} onChange={e => update('is_active', e.target.checked)} /> Activo</label>
       <label>Imagenes<input type="file" accept="image/*" multiple onChange={appendFiles} /></label>
       {(images.length > 0 || files.length > 0) && <div className="product-image-preview product-image-preview-list">
       <div className="product-preview-strip">{images.map(image => <div className="product-preview-tile" key={image.id}>
