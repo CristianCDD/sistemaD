@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, Award, Box, ChevronDown, ChevronLeft, ChevronRight, Headphones, Home, LayoutGrid, List, MapPin, Menu, MessageCircle, PackageCheck, Phone, Search, Truck, X } from 'lucide-react'
+import { ArrowRight, Award, Box, ChevronDown, ChevronLeft, ChevronRight, Headphones, Home, LayoutGrid, List, MapPin, Menu, MessageCircle, PackageCheck, Phone, RotateCcw, Search, Truck, X } from 'lucide-react'
 import './CatalogMobile.css'
 
 import { API_URL } from '../services/api'
@@ -136,6 +136,15 @@ function CatalogPage() {
     document.getElementById('catalog-products-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
+  const resetCatalog = () => {
+    setSearchTerm('')
+    setSelectedCategory('Todas las categorias')
+    setLayout('grid')
+    setMenuOpen(false)
+  }
+
+  const hasActiveFilters = Boolean(searchTerm.trim()) || selectedCategory !== 'Todas las categorias' || layout !== 'grid'
+
   return (
     <main className="catalog-page">
       <header className="catalog-topbar">
@@ -215,6 +224,9 @@ function CatalogPage() {
               </select>
               <ChevronDown size={18} />
             </label>
+            <button className="catalog-reset-button" type="button" onClick={resetCatalog} disabled={!hasActiveFilters} title="Restablecer catalogo">
+              <RotateCcw size={17} /> <span>Restablecer</span>
+            </button>
             <div className="catalog-mobile-layout" aria-label="Vista de productos">
               <button title="Vista en cuadricula" aria-label="Vista en cuadricula" aria-pressed={layout === 'grid'} onClick={() => setLayout('grid')}><LayoutGrid size={20} /></button>
               <button title="Vista en lista" aria-label="Vista en lista" aria-pressed={layout === 'list'} onClick={() => setLayout('list')}><List size={20} /></button>
@@ -222,8 +234,26 @@ function CatalogPage() {
           </div>
         </div>
 
+        {publicCategories.length > 0 && <section className="catalog-desktop-categories" aria-labelledby="catalog-desktop-categories-heading">
+          <div className="catalog-categories-heading">
+            <div>
+              <span>EXPLORA POR TIPO</span>
+              <h2 id="catalog-desktop-categories-heading">Categorias</h2>
+            </div>
+            <button type="button" className="catalog-category-reset" onClick={resetCatalog} disabled={!hasActiveFilters}>
+              <RotateCcw size={16} /> Restablecer
+            </button>
+          </div>
+          <div className="catalog-category-grid">
+            {publicCategories.map(category => <button type="button" key={category.id} className={selectedCategory === category.name ? 'selected' : ''} onClick={() => chooseCategory(category)}>
+              {category.image_url ? <img loading="lazy" src={category.image_url} alt="" /> : <PackageCheck size={34} />}
+              <span>{category.name}</span>
+            </button>)}
+          </div>
+        </section>}
+
         {publicCategories.length > 0 && <section className="catalog-mobile-categories" aria-labelledby="catalog-categories-heading">
-          <div><h2 id="catalog-categories-heading">Categorias</h2><button type="button" onClick={() => setSelectedCategory('Todas las categorias')}>Ver todas</button></div>
+          <div><h2 id="catalog-categories-heading">Categorias</h2><button type="button" onClick={resetCatalog}>{hasActiveFilters ? 'Restablecer' : 'Ver todas'}</button></div>
           <div className="catalog-category-grid">
             {publicCategories.map(category => <button type="button" key={category.id} className={selectedCategory === category.name ? 'selected' : ''} onClick={() => chooseCategory(category)}>
               {category.image_url ? <img loading="lazy" src={category.image_url} alt="" /> : <PackageCheck size={34} />}
