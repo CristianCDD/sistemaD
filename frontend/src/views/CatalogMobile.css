@@ -1,5 +1,6 @@
 .catalog-mobile-control, .catalog-mobile-brand, .catalog-mobile-promo,
-.catalog-mobile-layout, .catalog-mobile-bottom, .catalog-quote-short { display: none; }
+.catalog-mobile-layout, .catalog-mobile-bottom, .catalog-quote-short,
+.catalog-mobile-assurances, .catalog-mobile-categories { display: none; }
 
 @media (max-width: 640px) {
   body:has(.catalog-page) { min-width: 0; }
@@ -19,6 +20,9 @@
   .catalog-mobile-promo h1 { margin: 0; font-size: 24px; line-height: 1.1; color: #063a80; }
   .catalog-mobile-promo p { max-width: 150px; margin: 10px 0 14px; font-size: 13px; color: #385675; line-height: 1.4; }
   .catalog-mobile-promo a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 6px; background: #006ee6; color: white; text-decoration: none; font-size: 12px; font-weight: 700; }
+  .catalog-mobile-assurances { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: calc(100% - 24px); margin: 0 auto 18px; }
+  .catalog-mobile-assurances span { display: grid; justify-items: center; gap: 6px; color: #063a80; font-size: 10px; font-weight: 700; line-height: 1.2; text-align: center; }
+  .catalog-mobile-assurances svg { color: #0078ed; }
   .catalog-page .catalog-section { margin-top: 0; width: calc(100% - 24px); scroll-margin-top: 12px; }
   .catalog-page .catalog-section-head { display: flex; flex-direction: column; align-items: stretch; gap: 14px; margin-bottom: 14px; }
   .catalog-page .catalog-section-head > div:first-child { display: none; }
@@ -27,6 +31,15 @@
   .catalog-page .catalog-search input { width: 100%; min-width: 0; font-size: 16px; min-height: 48px; }
   .catalog-page .catalog-select { border-radius: 8px; box-shadow: none; }
   .catalog-page .catalog-select select { width: 100%; min-height: 44px; font-size: 13px; }
+  .catalog-mobile-categories { display: grid; gap: 10px; margin-bottom: 20px; }
+  .catalog-mobile-categories > div:first-child { display: flex; align-items: center; justify-content: space-between; }
+  .catalog-mobile-categories h2 { margin: 0; color: #063a80; font-size: 20px; }
+  .catalog-mobile-categories > div:first-child button { padding: 0; border: 0; color: #0078ed; background: transparent; font-weight: 800; font-size: 12px; }
+  .catalog-category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .catalog-category-grid button { min-width: 0; min-height: 132px; padding: 8px 5px; border: 1px solid #e2edf8; border-radius: 8px; background: #fff; color: #063a80; box-shadow: 0 5px 14px #0847960a; font-size: 11px; font-weight: 800; line-height: 1.18; }
+  .catalog-category-grid button.selected { border-color: #0078ed; box-shadow: 0 0 0 2px #0078ed22; }
+  .catalog-category-grid img { display: block; width: 100%; height: 76px; margin-bottom: 6px; object-fit: contain; }
+  .catalog-category-grid svg { width: 48px; height: 76px; color: #0078ed; }
   .catalog-mobile-layout { display: flex; border: 1px solid #d7e7f7; border-radius: 8px; overflow: hidden; }
   .catalog-mobile-layout button { display: grid; place-items: center; width: 42px; height: 44px; border: 0; border-radius: 0; padding: 0; background: white; color: #52698d; }
   .catalog-mobile-layout button[aria-pressed="true"] { background: #0078ed; color: white; }

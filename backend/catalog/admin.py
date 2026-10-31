@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import Category, Product, ProductCatalogImage, ProductMaterialImage
-from .models import CatalogEntry, CatalogEntryImage
+from .models import CatalogCategory, CatalogEntry, CatalogEntryImage
 from .models import MaterialGuideEntry, MaterialGuideEntryImage
 
 
@@ -24,10 +24,17 @@ class CatalogEntryImageInline(admin.TabularInline):
 
 @admin.register(CatalogEntry)
 class CatalogEntryAdmin(admin.ModelAdmin):
-    list_display = ['name', 'origin', 'show_on_landing', 'is_active']
+    list_display = ['name', 'catalog_category', 'origin', 'show_on_landing', 'is_active']
     search_fields = ['name', 'sku', 'category']
     list_filter = ['origin', 'show_on_landing', 'is_active']
     inlines = [CatalogEntryImageInline]
+
+
+@admin.register(CatalogCategory)
+class CatalogCategoryAdmin(admin.ModelAdmin):
+    list_display = ['name', 'sort_order', 'is_active']
+    list_filter = ['is_active']
+    search_fields = ['name']
 
 
 @admin.register(Category)

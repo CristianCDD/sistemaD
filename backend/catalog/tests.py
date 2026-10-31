@@ -5,7 +5,7 @@ from django.db import connection
 from importlib import import_module
 from rest_framework.test import APIClient
 
-from .models import CatalogEntry, CatalogEntryImage, Category, Product, ProductCatalogImage
+from .models import CatalogCategory, CatalogEntry, CatalogEntryImage, Category, Product, ProductCatalogImage
 from .models import MaterialGuideEntry, MaterialGuideEntryImage, ProductMaterialImage
 
 
@@ -125,3 +125,23 @@ class IndependentCatalogTests(TestCase):
         self.assertEqual(len(response.data[0]['material_image_urls']), 1)
         self.assertNotIn('product', response.data[0])
         self.assertIn(self.client.post('/api/guia-materiales/', {'name': 'No autorizado'}).status_code, [401, 403])
+
+    def test_catalog_category_controls_catalog_entry_classification(self):
+        response = self.client.post('/api/catalogo-categorias/', {'name': 'Pruebas reflectivas'}, format='json')
+        self.assertEqual(response.status_code, 201)
+        category = response.data
+        self.assertEqual(category['slug'], 'pruebas-reflectivas')
+
+        response = self.client.patch(
+            f'/api/catalogo/{self.entry.pk}/',
+            {'catalog_category': category['id']},
+            format='json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['category'], 'Pruebas reflectivas')
+        self.assertEqual(response.data['catalog_category'], category['id'])
+
+        self.client.force_authenticate(None)
+        response = self.client.get('/api/public/landing/')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Pruebas reflectivas', [item['name'] for item in response.data['categories']])

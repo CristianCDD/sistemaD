@@ -1,7 +1,28 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from .models import CatalogEntry, MaterialGuideEntry
+from django.utils.text import slugify
+
+from .models import CatalogCategory, CatalogEntry, MaterialGuideEntry
+
+
+class CatalogCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CatalogCategory
+        fields = ['id', 'name', 'slug', 'is_active', 'sort_order']
+        read_only_fields = ['slug', 'sort_order']
+
+    def validate_name(self, value):
+        return value.strip()
+
+    def create(self, validated_data):
+        base_slug = slugify(validated_data['name']) or 'categoria'
+        slug = base_slug
+        suffix = 2
+        while CatalogCategory.objects.filter(slug=slug).exists():
+            slug = f'{base_slug}-{suffix}'
+            suffix += 1
+        return super().create({**validated_data, 'slug': slug, 'sort_order': CatalogCategory.objects.count() + 1})
 
 
 class CatalogEntrySerializer(serializers.ModelSerializer):
@@ -13,7 +34,7 @@ class CatalogEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = CatalogEntry
         fields = ['id', 'product', 'name', 'sku', 'description', 'category', 'origin', 'tags',
-                  'sale_price', 'show_price_on_landing', 'show_on_landing', 'is_active',
+                  'catalog_category', 'sale_price', 'show_price_on_landing', 'show_on_landing', 'is_active',
                   'catalog_images_data', 'catalog_image_urls', 'image_url', 'display_price']
 
     def get_catalog_images_data(self, obj):
@@ -30,6 +51,12 @@ class CatalogEntrySerializer(serializers.ModelSerializer):
 
     def get_display_price(self, obj):
         return obj.sale_price if obj.show_price_on_landing else None
+
+    def validate(self, attrs):
+        category = attrs.get('catalog_category')
+        if category:
+            attrs['category'] = category.name
+        return attrs
 
     def sync_images(self, entry):
         request = self.context.get('request')

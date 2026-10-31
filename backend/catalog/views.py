@@ -3,8 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from .models import Category, Product
-from .models import CatalogEntry
-from .catalog_serializers import CatalogEntrySerializer, PublicCatalogEntrySerializer
+from .models import CatalogCategory, CatalogEntry
+from .catalog_serializers import CatalogCategorySerializer, CatalogEntrySerializer, PublicCatalogEntrySerializer
 from .models import MaterialGuideEntry
 from .catalog_serializers import MaterialGuideEntrySerializer, PublicMaterialGuideEntrySerializer
 from .serializers import (
@@ -39,6 +39,11 @@ class CatalogEntryViewSet(viewsets.ModelViewSet):
     serializer_class = CatalogEntrySerializer
     filterset_fields = ['origin', 'show_on_landing', 'is_active']
     search_fields = ['name', 'sku', 'description', 'category']
+
+
+class CatalogCategoryViewSet(viewsets.ModelViewSet):
+    queryset = CatalogCategory.objects.all()
+    serializer_class = CatalogCategorySerializer
 
 
 class PublicProductViewSet(viewsets.ReadOnlyModelViewSet):

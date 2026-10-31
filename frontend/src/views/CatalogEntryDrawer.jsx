@@ -3,10 +3,10 @@ import { Save, Trash2, X } from 'lucide-react'
 import { api } from '../services/api'
 import { prepareImageUpload } from '../utils/prepareImageUpload'
 
-export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode = false, autoSave = false }) {
+export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode = false, autoSave = false, categories = [] }) {
   const [form, setForm] = useState({
     name: entry?.name || '', sku: entry?.sku || '', description: entry?.description || '',
-    ...(!guideMode ? { category: entry?.category || '' } : {}),
+    ...(!guideMode ? { catalog_category: entry?.catalog_category || '' } : {}),
   })
   const savedForm = useRef(JSON.stringify(form))
   const [images, setImages] = useState(entry?.catalog_images_data || [])
@@ -111,7 +111,10 @@ export default function CatalogEntryDrawer({ entry, onClose, onSaved, guideMode 
       <div className="form-grid">
         <label>Nombre comercial<input required maxLength={160} value={form.name} onChange={e => update('name', e.target.value)} /></label>
         <label>Codigo<input maxLength={80} value={form.sku} onChange={e => update('sku', e.target.value)} /></label>
-        {!guideMode && <label>Categoria<input maxLength={120} value={form.category} onChange={e => update('category', e.target.value)} /></label>}
+        {!guideMode && <label>Categoria<select required value={form.catalog_category} onChange={e => update('catalog_category', e.target.value ? Number(e.target.value) : '')}>
+          <option value="">Selecciona una categoria</option>
+          {categories.map(category => <option key={category.id} value={category.id}>{category.name}</option>)}
+        </select></label>}
       </div>
       <label>Descripcion<textarea value={form.description} onChange={e => update('description', e.target.value)} /></label>
       <label>Imagenes<input type="file" accept="image/*" multiple disabled={saving} onChange={appendFiles} /></label>

@@ -39,6 +39,7 @@ function WhatsAppIcon({ size = 20 }) {
 
 function CatalogPage() {
   const [publicProducts, setPublicProducts] = useState([])
+  const [publicCategories, setPublicCategories] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [cardImageIndexes, setCardImageIndexes] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
@@ -56,7 +57,10 @@ function CatalogPage() {
         const response = await fetch(`${API_URL}/public/landing/`, { cache: 'no-store' })
         if (!response.ok) return
         const data = await response.json()
-        if (!cancelled) setPublicProducts(data.products || [])
+        if (!cancelled) {
+          setPublicProducts(data.products || [])
+          setPublicCategories(data.categories || [])
+        }
       } catch {
         // Preserve the visible catalog when the connection briefly fails.
       } finally {
@@ -77,7 +81,10 @@ function CatalogPage() {
 
   const selectedImages = selectedProduct?.images || []
   const selectedImage = selectedImages[selectedProduct?.imageIndex || 0]
-  const categories = ['Todas las categorias', ...Array.from(new Set(publicProducts.map(productCategory))).filter(Boolean)]
+  const categories = ['Todas las categorias', ...Array.from(new Set([
+    ...publicCategories.map(category => category.name),
+    ...publicProducts.map(productCategory),
+  ])).filter(Boolean)]
   const normalizedSearch = searchTerm.trim().toLowerCase()
   const filteredProducts = publicProducts.filter((product) => {
     const category = productCategory(product)
@@ -122,6 +129,11 @@ function CatalogPage() {
       const nextIndex = (current.imageIndex + direction + current.images.length) % current.images.length
       return { ...current, imageIndex: nextIndex }
     })
+  }
+
+  const chooseCategory = category => {
+    setSelectedCategory(category.name)
+    document.getElementById('catalog-products-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   return (
@@ -172,6 +184,11 @@ function CatalogPage() {
         <img src={vinilRolloImage} alt="Rollo de material para publicidad" />
         <div><h1>Materiales para publicidad</h1><p>Encuentra lo que tu proyecto necesita.</p><a href="#productos">Ver productos <ArrowRight size={18} /></a></div>
       </section>
+      <section className="catalog-mobile-assurances" aria-label="Beneficios">
+        <span><Truck size={25} />Envios a todo el Peru</span>
+        <span><PackageCheck size={25} />Materiales de alta calidad</span>
+        <span><Headphones size={25} />Asesoria personalizada</span>
+      </section>
 
       <section className="catalog-section" id="productos">
         <div className="catalog-section-head">
@@ -205,7 +222,17 @@ function CatalogPage() {
           </div>
         </div>
 
-        <div className={`catalog-grid ${layout === 'list' ? 'catalog-list' : ''}`}>
+        {publicCategories.length > 0 && <section className="catalog-mobile-categories" aria-labelledby="catalog-categories-heading">
+          <div><h2 id="catalog-categories-heading">Categorias</h2><button type="button" onClick={() => setSelectedCategory('Todas las categorias')}>Ver todas</button></div>
+          <div className="catalog-category-grid">
+            {publicCategories.map(category => <button type="button" key={category.id} className={selectedCategory === category.name ? 'selected' : ''} onClick={() => chooseCategory(category)}>
+              {category.image_url ? <img loading="lazy" src={category.image_url} alt="" /> : <PackageCheck size={34} />}
+              <span>{category.name}</span>
+            </button>)}
+          </div>
+        </section>}
+
+        <div id="catalog-products-grid" className={`catalog-grid ${layout === 'list' ? 'catalog-list' : ''}`}>
           {filteredProducts.map((product) => {
             const images = productImages(product)
             const currentIndex = cardImageIndex(product)

@@ -64,6 +64,13 @@ class CatalogEntry(models.Model):
     sku = models.CharField(max_length=80, blank=True)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=120, blank=True)
+    catalog_category = models.ForeignKey(
+        'CatalogCategory',
+        on_delete=models.SET_NULL,
+        related_name='entries',
+        blank=True,
+        null=True,
+    )
     origin = models.CharField(max_length=20, choices=[('importado', 'Importado'), ('local', 'Compra local'), ('sin_definir', 'Sin definir')], default='sin_definir')
     tags = models.CharField(max_length=240, blank=True)
     sale_price = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
@@ -73,6 +80,21 @@ class CatalogEntry(models.Model):
 
     class Meta:
         ordering = ['name']
+
+    def __str__(self):
+        return self.name
+
+
+class CatalogCategory(models.Model):
+    name = models.CharField(max_length=120, unique=True)
+    slug = models.SlugField(max_length=140, unique=True)
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['sort_order', 'name']
+        verbose_name = 'categoria de catalogo'
+        verbose_name_plural = 'categorias de catalogo'
 
     def __str__(self):
         return self.name

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Edit3, Plus, Trash2 } from 'lucide-react'
+import { Edit3, ListPlus, Plus, Tags, Trash2, X } from 'lucide-react'
 
 import Header from '../components/Header'
 import { api } from '../services/api'
@@ -9,6 +9,7 @@ import CatalogEntryDrawer from './CatalogEntryDrawer'
 function LandingView() {
   const [config, setConfig] = useState(null)
   const [products, setProducts] = useState([])
+  const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [saveStatus, setSaveStatus] = useState('')
   const configRef = useRef(null)
@@ -22,14 +23,19 @@ function LandingView() {
   const [query, setQuery] = useState('')
   const [error, setError] = useState('')
   const [busyId, setBusyId] = useState(null)
+  const [managingCategories, setManagingCategories] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [categoryError, setCategoryError] = useState('')
+  const [addingCategory, setAddingCategory] = useState(false)
 
   const load = async () => {
     setLoading(true)
     setError('')
     try {
-      const [configResponse, productsResponse] = await Promise.all([
+      const [configResponse, productsResponse, categoriesResponse] = await Promise.all([
         api.get('/landing/config/'),
         api.get('/catalogo/'),
+        api.get('/catalogo-categorias/'),
       ])
       const initialConfig = configResponse.data[0] || {
         business_name: 'Distribuidor Damian',
@@ -43,6 +49,7 @@ function LandingView() {
       configRef.current = initialConfig
       setConfig(initialConfig)
       setProducts(productsResponse.data)
+      setCategories(categoriesResponse.data)
     } catch {
       setError('No se pudo cargar el catalogo. Comprueba la conexion.')
     } finally {
@@ -163,6 +170,23 @@ function LandingView() {
     }
   }
 
+  const addCategory = async event => {
+    event.preventDefault()
+    const name = newCategoryName.trim()
+    if (!name || addingCategory) return
+    setAddingCategory(true)
+    setCategoryError('')
+    try {
+      const response = await api.post('/catalogo-categorias/', { name })
+      setCategories(current => [...current, response.data].sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name, 'es')))
+      setNewCategoryName('')
+    } catch (err) {
+      setCategoryError(err.response?.data?.name?.[0] || 'No se pudo agregar la categoria.')
+    } finally {
+      setAddingCategory(false)
+    }
+  }
+
   const filtered = products.filter(product => [product.name, product.sku, product.category].join(' ').toLowerCase().includes(query.trim().toLowerCase()))
 
   return (
@@ -170,7 +194,7 @@ function LandingView() {
       <Header
         title="Catalogo"
         subtitle="Productos publicados"
-        actions={<button className="primary-button" onClick={() => setCreating(true)}><Plus size={16} /> Nuevo producto para el catalogo</button>}
+        actions={<><button className="soft-button" onClick={() => setManagingCategories(true)}><Tags size={16} /> Categorias</button><button className="primary-button" onClick={() => setCreating(true)}><Plus size={16} /> Nuevo producto para el catalogo</button></>}
       />
 
       {error && <div className="form-error" role="alert">{error}</div>}
@@ -247,7 +271,20 @@ function LandingView() {
           </section>
         </>
       ) : null}
-      {(creating || editing) && <CatalogEntryDrawer autoSave={Boolean(editing)} entry={editing} onClose={() => { setCreating(false); setEditing(null) }} onSaved={saved => {
+      {managingCategories && <div className="drawer-backdrop" role="dialog" aria-modal="true" aria-labelledby="catalog-categories-title">
+        <section className="category-manager">
+          <div className="drawer-head"><div><h2 id="catalog-categories-title">Categorias del catalogo</h2><p>Elige categorias consistentes para todos los productos publicos.</p></div><button className="icon-button" onClick={() => setManagingCategories(false)} aria-label="Cerrar categorias"><X size={18} /></button></div>
+          <div className="category-manager-body">
+            <div className="category-manager-list">{categories.map(category => <span key={category.id}>{category.name}</span>)}</div>
+            <form className="category-manager-form" onSubmit={addCategory}>
+              <label>Nueva categoria<input maxLength={120} value={newCategoryName} onChange={event => setNewCategoryName(event.target.value)} placeholder="Ejemplo: Papeles y transfer" /></label>
+              <button className="primary-button" disabled={addingCategory}><ListPlus size={16} />{addingCategory ? 'Agregando...' : 'Agregar categoria'}</button>
+            </form>
+            {categoryError && <div className="form-error" role="alert">{categoryError}</div>}
+          </div>
+        </section>
+      </div>}
+      {(creating || editing) && <CatalogEntryDrawer categories={categories} autoSave={Boolean(editing)} entry={editing} onClose={() => { setCreating(false); setEditing(null) }} onSaved={saved => {
         setProducts(current => [...current.filter(item => item.id !== saved.id), saved].sort((a, b) => a.name.localeCompare(b.name, 'es')))
         if (editing) setEditing(saved)
         else setCreating(false)
