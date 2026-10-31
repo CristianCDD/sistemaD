@@ -1,0 +1,60 @@
+.catalog-mobile-control, .catalog-mobile-brand, .catalog-mobile-promo,
+.catalog-mobile-layout, .catalog-mobile-bottom, .catalog-quote-short { display: none; }
+
+@media (max-width: 640px) {
+  body:has(.catalog-page) { min-width: 0; }
+  .catalog-page { padding-bottom: calc(82px + env(safe-area-inset-bottom)); }
+  .catalog-page .catalog-topbar { position: relative; display: flex; justify-content: space-between; gap: 8px; padding: 12px; background: #fff; }
+  .catalog-page .catalog-mobile-control { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 40px; width: 40px; height: 44px; padding: 0; border: 0; background: transparent; color: #006ee6; }
+  .catalog-page .catalog-logo { display: flex; align-items: center; gap: 8px; width: auto; min-width: 0; padding: 0; background: transparent; box-shadow: none; text-decoration: none; }
+  .catalog-page .catalog-logo img { width: 76px; height: 42px; object-fit: contain; }
+  .catalog-mobile-brand { display: flex; flex-direction: column; color: #083a80; font-size: 12px; line-height: 1.2; }
+  .catalog-mobile-brand strong { font-size: 22px; }
+  .catalog-page .catalog-nav { display: none; }
+  .catalog-page .catalog-nav.is-open { display: flex; position: absolute; top: 100%; left: 12px; right: 12px; z-index: 15; background: white; padding: 16px; border: 1px solid #d7e7f7; border-radius: 8px; box-shadow: 0 8px 24px #08275d20; }
+  .catalog-page .catalog-contact, .catalog-page .catalog-banner { display: none; }
+  .catalog-mobile-promo { display: block; position: relative; isolation: isolate; overflow: hidden; margin: 4px 12px 18px; min-height: 188px; background: #eaf5ff; border-radius: 8px; }
+  .catalog-mobile-promo > img { position: absolute; z-index: -1; right: 0; bottom: 6px; width: 52%; height: 168px; object-fit: contain; }
+  .catalog-mobile-promo > div { padding: 20px 16px; width: 65%; }
+  .catalog-mobile-promo h1 { margin: 0; font-size: 24px; line-height: 1.1; color: #063a80; }
+  .catalog-mobile-promo p { max-width: 150px; margin: 10px 0 14px; font-size: 13px; color: #385675; line-height: 1.4; }
+  .catalog-mobile-promo a { display: inline-flex; align-items: center; gap: 6px; padding: 10px 12px; border-radius: 6px; background: #006ee6; color: white; text-decoration: none; font-size: 12px; font-weight: 700; }
+  .catalog-page .catalog-section { margin-top: 0; width: calc(100% - 24px); scroll-margin-top: 12px; }
+  .catalog-page .catalog-section-head { display: flex; flex-direction: column; align-items: stretch; gap: 14px; margin-bottom: 14px; }
+  .catalog-page .catalog-section-head > div:first-child { display: none; }
+  .catalog-page .catalog-tools { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+  .catalog-page .catalog-search { grid-column: 1 / -1; border-radius: 8px; box-shadow: none; padding: 0 12px; }
+  .catalog-page .catalog-search input { width: 100%; min-width: 0; font-size: 16px; min-height: 48px; }
+  .catalog-page .catalog-select { border-radius: 8px; box-shadow: none; }
+  .catalog-page .catalog-select select { width: 100%; min-height: 44px; font-size: 13px; }
+  .catalog-mobile-layout { display: flex; border: 1px solid #d7e7f7; border-radius: 8px; overflow: hidden; }
+  .catalog-mobile-layout button { display: grid; place-items: center; width: 42px; height: 44px; border: 0; border-radius: 0; padding: 0; background: white; color: #52698d; }
+  .catalog-mobile-layout button[aria-pressed="true"] { background: #0078ed; color: white; }
+  .catalog-page .catalog-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .catalog-page .catalog-product-card { min-width: 0; min-height: 0; grid-template-rows: auto 1fr; box-shadow: 0 4px 14px #08479608; }
+  .catalog-page .catalog-product-badge { display: none; }
+  .catalog-page .catalog-product-frame, .catalog-page .catalog-product-empty { height: auto; aspect-ratio: 1; background: white; }
+  .catalog-page .catalog-product-frame img { inset: 10px; width: calc(100% - 20px); height: calc(100% - 20px) !important; object-fit: contain; }
+  .catalog-page .catalog-product-info { min-width: 0; padding: 10px; gap: 8px; }
+  .catalog-page .catalog-product-info strong { font-size: 14px; line-height: 1.25; font-style: normal; overflow-wrap: anywhere; }
+  .catalog-page .catalog-product-info p { min-height: 0; font-size: 12px; overflow-wrap: anywhere; }
+  .catalog-page .catalog-product-tags { gap: 4px; }
+  .catalog-page .catalog-product-tags span { padding: 4px 6px; min-height: 0; overflow-wrap: anywhere; }
+  .catalog-page .catalog-product-info .catalog-quote-button { box-sizing: border-box; width: 100%; min-height: 42px; padding: 8px 4px; gap: 5px; font-size: 13px; box-shadow: none; }
+  .catalog-page .catalog-quote-full { display: none; }
+  .catalog-page .catalog-quote-short { display: inline; }
+  .catalog-page .catalog-list { grid-template-columns: 1fr; }
+  .catalog-page .catalog-list .catalog-product-card { grid-template-columns: 38% minmax(0, 1fr); grid-template-rows: 1fr; align-items: center; }
+  .catalog-page .catalog-list .catalog-product-info { min-height: 142px; }
+  .catalog-page .catalog-service-strip { padding: 18px 8px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+  .catalog-page .catalog-service-strip span { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; min-width: 0; }
+  .catalog-page .catalog-service-strip strong, .catalog-page .catalog-service-strip small { font-size: 12px; overflow-wrap: anywhere; max-width: 100%; }
+  .catalog-mobile-bottom { display: flex; position: fixed; z-index: 20; bottom: 0; left: 0; right: 0; justify-content: space-around; background: #fff; border-top: 1px solid #dfebf6; padding: 10px 4px calc(10px + env(safe-area-inset-bottom)); }
+  .catalog-mobile-bottom a { display: flex; align-items: center; flex-direction: column; justify-content: center; gap: 5px; min-height: 44px; text-decoration: none; color: #5f7395; font-size: 11px; }
+  .catalog-mobile-bottom a[aria-current] { color: #0078ed; }
+  .catalog-mobile-bottom a:last-child { color: #109c46; }
+  .catalog-page .catalog-detail-modal { padding: 12px; z-index: 100; }
+  .catalog-page .catalog-detail-viewer { width: 100%; max-height: calc(100dvh - 24px); }
+  .catalog-page .catalog-detail-info h2 { font-size: 24px; overflow-wrap: anywhere; }
+  .catalog-page .catalog-detail-info { padding: 20px; }
+}

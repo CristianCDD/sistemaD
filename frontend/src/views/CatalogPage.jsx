@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Award, Box, ChevronDown, ChevronLeft, ChevronRight, Headphones, MapPin, MessageCircle, PackageCheck, Phone, Search, Truck, X } from 'lucide-react'
+import { ArrowRight, Award, Box, ChevronDown, ChevronLeft, ChevronRight, Headphones, Home, LayoutGrid, List, MapPin, Menu, MessageCircle, PackageCheck, Phone, Search, Truck, X } from 'lucide-react'
+import './CatalogMobile.css'
 
 import { API_URL } from '../services/api'
 import { money } from '../utils/format'
@@ -42,6 +43,8 @@ function CatalogPage() {
   const [cardImageIndexes, setCardImageIndexes] = useState({})
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todas las categorias')
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [layout, setLayout] = useState('grid')
 
   useEffect(() => {
     let cancelled = false
@@ -124,10 +127,13 @@ function CatalogPage() {
   return (
     <main className="catalog-page">
       <header className="catalog-topbar">
+        <button className="catalog-mobile-control" aria-label={menuOpen ? 'Cerrar menu' : 'Abrir menu'} aria-expanded={menuOpen} aria-controls="catalog-navigation" onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
         <a className="catalog-logo" href="/" aria-label="Distribuidor Damian">
           <img src={logo} alt="Distribuidor Damian" />
+          <span className="catalog-mobile-brand">Distribuidor<strong>Damian</strong></span>
         </a>
-        <nav className="catalog-nav" aria-label="Navegacion del catalogo">
+        <button className="catalog-mobile-control" aria-label="Buscar productos" onClick={() => document.getElementById('catalog-search-input')?.focus()}><Search /></button>
+        <nav id="catalog-navigation" className={`catalog-nav ${menuOpen ? 'is-open' : ''}`} aria-label="Navegacion del catalogo">
           <a href="/">Inicio</a>
           <a className="active" href="/catalogo">Catalogo</a>
           <a href="/#tienda">Nosotros</a>
@@ -162,6 +168,11 @@ function CatalogPage() {
         </div>
       </section>
 
+      <section className="catalog-mobile-promo" aria-label="Materiales para publicidad">
+        <img src={vinilRolloImage} alt="Rollo de material para publicidad" />
+        <div><h1>Materiales para publicidad</h1><p>Encuentra lo que tu proyecto necesita.</p><a href="#productos">Ver productos <ArrowRight size={18} /></a></div>
+      </section>
+
       <section className="catalog-section" id="productos">
         <div className="catalog-section-head">
           <div>
@@ -172,23 +183,29 @@ function CatalogPage() {
             <label className="catalog-search">
               <Search size={22} />
               <input
+                id="catalog-search-input"
+                aria-label="Buscar producto"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Buscar producto..."
               />
             </label>
             <label className="catalog-select">
-              <select value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)}>
+              <select id="catalog-category" aria-label="Categoria" value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)}>
                 {categories.map((category) => (
                   <option key={category} value={category}>{category}</option>
                 ))}
               </select>
               <ChevronDown size={18} />
             </label>
+            <div className="catalog-mobile-layout" aria-label="Vista de productos">
+              <button title="Vista en cuadricula" aria-label="Vista en cuadricula" aria-pressed={layout === 'grid'} onClick={() => setLayout('grid')}><LayoutGrid size={20} /></button>
+              <button title="Vista en lista" aria-label="Vista en lista" aria-pressed={layout === 'list'} onClick={() => setLayout('list')}><List size={20} /></button>
+            </div>
           </div>
         </div>
 
-        <div className="catalog-grid">
+        <div className={`catalog-grid ${layout === 'list' ? 'catalog-list' : ''}`}>
           {filteredProducts.map((product) => {
             const images = productImages(product)
             const currentIndex = cardImageIndex(product)
@@ -214,7 +231,7 @@ function CatalogPage() {
                 <span className="catalog-product-badge">{category}</span>
                 {currentImage ? (
                   <div className="catalog-product-frame">
-                    <img src={currentImage} alt={`${product.name} ${currentIndex + 1}`} />
+                    <img loading="lazy" decoding="async" src={currentImage} alt={`${product.name} ${currentIndex + 1}`} />
                     {images.length > 1 && (
                       <>
                         <button className="card-carousel-arrow card-carousel-prev" type="button" onClick={(event) => moveCardImage(event, product, -1)} aria-label="Imagen anterior">
@@ -247,7 +264,7 @@ function CatalogPage() {
                     onClick={(event) => event.stopPropagation()}
                   >
                     <WhatsAppIcon size={22} />
-                    <span>Consultar por WhatsApp</span>
+                    <span className="catalog-quote-full">Consultar por WhatsApp</span><span className="catalog-quote-short">Consultar</span>
                   </a>
                 </div>
               </article>
@@ -268,6 +285,13 @@ function CatalogPage() {
           <span><Headphones size={28} /><strong>Atencion especializada</strong><small>en cada compra</small></span>
         </div>
       </section>
+
+      <nav className="catalog-mobile-bottom" aria-label="Navegacion movil">
+        <a href="/"><Home size={22} /><span>Inicio</span></a>
+        <a href="#productos" aria-current="page"><LayoutGrid size={22} /><span>Productos</span></a>
+        <a href="/#contacto"><MapPin size={22} /><span>Ubicacion</span></a>
+        <a href="https://wa.me/51923327469" target="_blank" rel="noreferrer"><WhatsAppIcon size={24} /><span>WhatsApp</span></a>
+      </nav>
 
       {selectedProduct && (
         <div className="catalog-detail-modal" role="dialog" aria-modal="true" onClick={() => setSelectedProduct(null)}>
