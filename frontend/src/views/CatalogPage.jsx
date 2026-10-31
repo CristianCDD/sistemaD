@@ -131,10 +131,22 @@ function CatalogPage() {
     })
   }
 
+  const selectCategory = (categoryName) => {
+    setSearchTerm('')
+    setSelectedCategory(categoryName)
+  }
+
   const chooseCategory = category => {
-    setSelectedCategory(category.name)
+    selectCategory(category.name)
     document.getElementById('catalog-products-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+
+  const searchProducts = (value) => {
+    setSearchTerm(value)
+    if (value.trim()) setSelectedCategory('Todas las categorias')
+  }
+
+  const resetCategory = () => setSelectedCategory('Todas las categorias')
 
   const resetCatalog = () => {
     setSearchTerm('')
@@ -212,12 +224,12 @@ function CatalogPage() {
                 id="catalog-search-input"
                 aria-label="Buscar producto"
                 value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
+                onChange={(event) => searchProducts(event.target.value)}
                 placeholder="Buscar producto..."
               />
             </label>
             <label className="catalog-select">
-              <select id="catalog-category" aria-label="Categoria" value={selectedCategory} onChange={(event) => setSelectedCategory(event.target.value)}>
+              <select id="catalog-category" aria-label="Categoria" value={selectedCategory} onChange={(event) => selectCategory(event.target.value)}>
                 {categories.map((category) => (
                   <option key={category} value={category}>{category}</option>
                 ))}
@@ -226,6 +238,9 @@ function CatalogPage() {
             </label>
             <button className="catalog-reset-button" type="button" onClick={resetCatalog} disabled={!hasActiveFilters} title="Restablecer catalogo">
               <RotateCcw size={17} /> <span>Restablecer</span>
+            </button>
+            <button className="catalog-mobile-category-reset" type="button" onClick={resetCategory} disabled={selectedCategory === 'Todas las categorias'} title="Restablecer categoria" aria-label="Restablecer categoria">
+              <RotateCcw size={18} />
             </button>
             <div className="catalog-mobile-layout" aria-label="Vista de productos">
               <button title="Vista en cuadricula" aria-label="Vista en cuadricula" aria-pressed={layout === 'grid'} onClick={() => setLayout('grid')}><LayoutGrid size={20} /></button>
@@ -253,7 +268,7 @@ function CatalogPage() {
         </section>}
 
         {publicCategories.length > 0 && <section className="catalog-mobile-categories" aria-labelledby="catalog-categories-heading">
-          <div><h2 id="catalog-categories-heading">Categorias</h2><button type="button" onClick={resetCatalog}>{hasActiveFilters ? 'Restablecer' : 'Ver todas'}</button></div>
+          <div><h2 id="catalog-categories-heading">Categorias</h2><button type="button" onClick={resetCategory}>{selectedCategory !== 'Todas las categorias' ? 'Restablecer' : 'Ver todas'}</button></div>
           <div className="catalog-category-grid">
             {publicCategories.map(category => <button type="button" key={category.id} className={selectedCategory === category.name ? 'selected' : ''} onClick={() => chooseCategory(category)}>
               {category.image_url ? <img loading="lazy" src={category.image_url} alt="" /> : <PackageCheck size={34} />}
