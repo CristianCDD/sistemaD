@@ -1350,7 +1350,7 @@ button {
 
 .catalog-page {
   min-height: 100vh;
-  padding: 0 0 54px;
+  padding: 0;
   background: #f8fbff;
   color: #08275d;
 }
