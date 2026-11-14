@@ -1,4 +1,6 @@
+from io import BytesIO
 from unittest.mock import patch
+from zipfile import ZipFile
 
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -72,3 +74,38 @@ class DocumentLibraryTests(APITestCase):
         self.assertEqual(self.upload().status_code, 201)
         self.assertEqual(self.upload('FACTURA.PDF').status_code, 409)
         self.assertEqual(Document.objects.count(), 1)
+
+    def upload_zip(self, entries):
+        buffer = BytesIO()
+        with ZipFile(buffer, 'w') as archive:
+            for name, content in entries.items():
+                archive.writestr(name, content)
+        return self.client.post(reverse('document-import-zip'), {
+            'file': SimpleUploadedFile('documentos.zip', buffer.getvalue()),
+        }, format='multipart')
+
+    def test_zip_preserves_nested_folders_and_does_not_overwrite(self):
+        self.client.force_authenticate(self.admin)
+        path = 'Impor.Damian/Depositos/2026/Deposito.pdf'
+        entries = {path: b'original', 'Impor.Damian/Facturas/Vacia/': b''}
+        first = self.upload_zip(entries)
+        self.assertEqual(first.status_code, 201)
+        self.assertEqual(first.data, {'imported': 1, 'existing': 0, 'conflicts': 0, 'folders_created': 2})
+        document = Document.objects.get()
+        self.assertEqual(document.folder.parent.name, 'Dep\u00f3sitos')
+        self.assertTrue(Folder.objects.filter(parent=self.folder, name='Vacia').exists())
+        self.assertEqual(self.upload_zip(entries).data['existing'], 1)
+        self.assertEqual(self.upload_zip({path: b'cambio'}).data['conflicts'], 1)
+        document.refresh_from_db()
+        self.assertEqual(bytes(document.content), b'original')
+
+    def test_zip_rejects_unsafe_paths_and_rolls_back_on_quota(self):
+        self.client.force_authenticate(self.admin)
+        self.assertEqual(self.upload_zip({'../escape.pdf': b'x'}).status_code, 400)
+        with patch('documents.views.MAX_LIBRARY_BYTES', 3):
+            response = self.upload_zip({'Nueva/a.pdf': b'123', 'Nueva/b.pdf': b'4'})
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(Folder.objects.filter(name='Nueva').exists())
+        self.assertFalse(Document.objects.exists())
+        self.client.force_authenticate(self.member)
+        self.assertEqual(self.upload_zip({'test.pdf': b'x'}).status_code, 403)

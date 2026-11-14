@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
-import { ChevronRight, Download, FileText, Folder, FolderOpen, FolderPlus, RefreshCw, Search, Upload, X } from 'lucide-react'
+import { Archive, ChevronRight, Download, FileText, Folder, FolderOpen, FolderPlus, RefreshCw, Search, Upload, X } from 'lucide-react'
 
 import Header from '../components/Header'
 import { api } from '../services/api'
@@ -33,6 +33,7 @@ export default function DocumentsView() {
   const [folderName, setFolderName] = useState('')
   const [creating, setCreating] = useState(false)
   const uploadInput = useRef(null)
+  const zipInput = useRef(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -131,6 +132,32 @@ export default function DocumentsView() {
     }
   }
 
+  async function uploadZip(event) {
+    const file = event.target.files[0]
+    event.target.value = ''
+    if (!file) return
+    setActionError('')
+    setNotice('')
+    if (file.size > library.max_zip_bytes) {
+      setActionError(`El ZIP supera los ${sizeLabel(library.max_zip_bytes)}.`)
+      return
+    }
+    setBusy('zip')
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      if (folder) form.append('folder', folder)
+      const { data } = await api.post('/documentos/importar-zip/', form)
+      setQuery('')
+      setNotice(`Archivos importados: ${data.imported}. Ya existentes: ${data.existing}. Conflictos sin sobrescribir: ${data.conflicts}.`)
+      reload()
+    } catch (error) {
+      setActionError(errorMessage(error, 'No se pudo importar el ZIP.'))
+    } finally {
+      setBusy('')
+    }
+  }
+
   return (
     <>
       <Header title="Documentos" subtitle="Archivos compartidos de Distribuidor Damian" />
@@ -157,6 +184,14 @@ export default function DocumentsView() {
                   <Upload size={18} aria-hidden="true" /> {busy === 'upload' ? 'Subiendo...' : 'Subir archivo'}
                 </button>
                 <input hidden ref={uploadInput} type="file" accept={library.extensions.join(',')} onChange={upload} aria-label="Elegir archivo" />
+                {library.max_zip_bytes && (
+                  <>
+                    <button type="button" className="soft-button" disabled={loading || Boolean(busy) || Boolean(loadError)} onClick={() => zipInput.current.click()}>
+                      <Archive size={18} aria-hidden="true" /> {busy === 'zip' ? 'Importando...' : 'Importar ZIP'}
+                    </button>
+                    <input hidden ref={zipInput} type="file" accept=".zip" onChange={uploadZip} aria-label="Elegir ZIP" />
+                  </>
+                )}
               </>
             )}
           </div>
