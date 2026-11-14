@@ -3,6 +3,7 @@ import { Archive, ChevronRight, Download, FileText, Folder, FolderOpen, FolderPl
 
 import Header from '../components/Header'
 import { api } from '../services/api'
+import DocumentPreview from './DocumentPreview'
 import './DocumentsView.css'
 
 const dateFormat = new Intl.DateTimeFormat('es-PE', { dateStyle: 'medium', timeZone: 'America/Lima' })
@@ -32,6 +33,7 @@ export default function DocumentsView() {
   const [busy, setBusy] = useState('')
   const [folderName, setFolderName] = useState('')
   const [creating, setCreating] = useState(false)
+  const [selectedDocument, setSelectedDocument] = useState(null)
   const uploadInput = useRef(null)
   const zipInput = useRef(null)
 
@@ -113,20 +115,22 @@ export default function DocumentsView() {
     }
   }
 
-  async function download(document) {
+  async function download(document, previewBlob) {
     setBusy(`download-${document.id}`)
     setActionError('')
     setNotice('')
     try {
-      const { data } = await api.get(`/documentos/archivos/${document.id}/descargar/`, { responseType: 'blob' })
-      const url = URL.createObjectURL(data)
+      const blob = previewBlob || (await api.get(`/documentos/archivos/${document.id}/descargar/`, { responseType: 'blob' })).data
+      const url = URL.createObjectURL(blob)
       const link = window.document.createElement('a')
       link.href = url
       link.download = document.name
       link.click()
       window.setTimeout(() => URL.revokeObjectURL(url), 30000)
+      return true
     } catch {
       setActionError('No se pudo descargar el archivo.')
+      return false
     } finally {
       setBusy('')
     }
@@ -231,7 +235,7 @@ export default function DocumentsView() {
                       ))}
                       {library.documents.map((item) => (
                         <tr key={`file-${item.id}`}>
-                          <th scope="row"><div className="documents-filename"><FileText size={21} aria-hidden="true" /> <span>{item.name}</span></div></th>
+                          <th scope="row"><button className="documents-filename" type="button" title="Abrir vista previa" disabled={Boolean(busy)} onClick={() => setSelectedDocument(item)}><FileText size={21} aria-hidden="true" /> <span>{item.name}</span></button></th>
                           <td>{dateFormat.format(new Date(item.created_at))}</td><td>{sizeLabel(item.size)}</td>
                           <td><button type="button" className="icon-button" title={`Descargar ${item.name}`} aria-label={`Descargar ${item.name}`} disabled={Boolean(busy)} onClick={() => download(item)}><Download size={17} aria-hidden="true" /></button></td>
                         </tr>
@@ -240,6 +244,7 @@ export default function DocumentsView() {
                   </table>
                 </div>}
       </section>
+      {selectedDocument && <DocumentPreview key={selectedDocument.id} item={selectedDocument} onClose={() => setSelectedDocument(null)} onDownload={download} />}
     </>
   )
 }
