@@ -5,6 +5,7 @@ import { api, clearStoredSession, refreshKey, setAuthToken, tokenKey } from './s
 import CalendarView from './views/CalendarView'
 import CatalogPage from './views/CatalogPage'
 import ConfigView from './views/ConfigView'
+import DocumentsView from './views/DocumentsView'
 import HomeView from './views/HomeView'
 import LandingView from './views/LandingView'
 import MaterialGuideView from './views/MaterialGuideView'
@@ -65,6 +66,7 @@ function App() {
       {activeView === 'movimientos' && <MovementsView />}
       {activeView === 'landing' && <LandingView />}
       {activeView === 'calendario' && <CalendarView />}
+      {activeView === 'documentos' && <DocumentsView />}
       {activeView === 'config' && <ConfigView user={user} />}
     </DashboardShell>
   )

@@ -49,6 +49,7 @@ urlpatterns = [
     path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/auth/me/', MeView.as_view(), name='auth_me'),
+    path('api/documentos/', include('documents.urls')),
     path('api/', include(router.urls)),
     path('api/reportes/stock/', StockSummaryView.as_view(), name='stock-summary'),
     path('api/public/', include(public_router.urls)),

@@ -1,0 +1,69 @@
+.documents-panel {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #e3e8f2;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.documents-toolbar, .documents-filters, .documents-create {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e3e8f2;
+}
+
+.documents-toolbar { justify-content: space-between; }
+.documents-actions, .documents-path { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.documents-actions:empty { display: none; }
+.documents-path { color: #667085; }
+.documents-path button, .documents-folder {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 6px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #1b64e8;
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.documents-path button[aria-current] { color: #15253a; font-weight: 800; }
+.documents-path button:hover, .documents-folder:hover { background: #eef3fb; }
+.documents-path svg, .documents-folder svg, .documents-filename svg { flex-shrink: 0; }
+.documents-folder svg { color: #b97714; }
+.documents-filename svg { color: #667085; }
+.documents-search {
+  display: flex;
+  align-items: center;
+  width: min(100%, 330px);
+  min-width: 0;
+  gap: 8px;
+  color: #667085;
+}
+.documents-search input { min-width: 0; }
+.documents-create { align-items: flex-end; background: #f8fbff; }
+.documents-create label { flex: 1 1 180px; min-width: 0; }
+.documents-panel > .form-error, .documents-notice { margin: 12px 18px; overflow-wrap: anywhere; }
+.documents-notice { color: #176844; font-weight: 700; }
+.documents-list table { width: 100%; min-width: 0; table-layout: fixed; }
+.documents-list th, .documents-list td { padding: 11px 14px; vertical-align: middle; }
+.documents-list tbody th { text-transform: none; font-size: 14px; color: #15253a; }
+.documents-list thead th:nth-child(2) { width: 128px; }
+.documents-list thead th:nth-child(3) { width: 92px; }
+.documents-list thead th:last-child { width: 62px; }
+.documents-filename { display: flex; gap: 8px; align-items: center; padding: 6px; overflow-wrap: anywhere; }
+
+@media (max-width: 640px) {
+  .documents-toolbar, .documents-filters, .documents-create { padding-inline: 10px; }
+  .documents-search { flex: 1; }
+  .documents-list th, .documents-list td { padding: 8px 6px; }
+  .documents-list th:nth-child(2), .documents-list td:nth-child(2) { display: none; }
+  .documents-list thead th:nth-child(3) { width: 64px; }
+  .documents-list thead th:last-child { width: 46px; }
+}

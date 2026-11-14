@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'catalog',
     'inventory',
     'landing',
+    'documents',
 ]
 
 MIDDLEWARE = [
