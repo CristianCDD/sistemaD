@@ -84,6 +84,52 @@ class DocumentLibraryTests(APITestCase):
             'file': SimpleUploadedFile('documentos.zip', buffer.getvalue()),
         }, format='multipart')
 
+    def test_rename_keeps_folder_id_children_files_and_shared_visibility(self):
+        self.client.force_authenticate(self.admin)
+        self.upload()
+        child = Folder.objects.create(name='2026', name_key='2026', parent=self.folder)
+        url = reverse('document-folder-detail', args=[self.folder.pk])
+        response = self.client.patch(url, {'name': '  Comprobantes ✅  '}, format='json')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data, {'id': self.folder.pk, 'name': 'Comprobantes ✅'})
+        self.folder.refresh_from_db()
+        self.assertEqual(self.folder.name_key, 'comprobantes ✅')
+        self.assertEqual(Document.objects.get().folder_id, self.folder.pk)
+        child.refresh_from_db()
+        self.assertEqual(child.parent_id, self.folder.pk)
+        self.client.force_authenticate(self.member)
+        listing = self.client.get(self.library_url, {'carpeta': self.root.pk})
+        self.assertIn(response.data, listing.data['folders'])
+        nested = self.client.get(self.library_url, {'carpeta': child.pk})
+        self.assertEqual(nested.data['path'][1]['name'], 'Comprobantes ✅')
+
+    def test_rename_rejects_duplicates_and_invalid_names(self):
+        self.client.force_authenticate(self.admin)
+        url = reverse('document-folder-detail', args=[self.folder.pk])
+        self.assertEqual(self.client.patch(url, {'name': 'IMPORTACIONES'}, format='json').status_code, 409)
+        for name in ('', '   ', '../archivo', '.', 'a/b', 'a\\b', 'x' * 121):
+            self.assertEqual(self.client.patch(url, {'name': name}, format='json').status_code, 400)
+        self.assertEqual(self.client.patch(url, {}, format='json').status_code, 400)
+        self.folder.refresh_from_db()
+        self.assertEqual(self.folder.name, 'Facturas')
+        self.assertEqual(self.client.patch(url, {'name': 'FACTURAS'}, format='json').status_code, 200)
+        self.assertEqual(self.client.patch(reverse('document-folder-detail', args=[999999]), {'name': 'Nueva'}, format='json').status_code, 404)
+
+    def test_rename_requires_active_admin_and_does_not_move_folder(self):
+        url = reverse('document-folder-detail', args=[self.folder.pk])
+        self.assertEqual(self.client.patch(url, {'name': 'Nueva'}, format='json').status_code, 401)
+        self.client.force_authenticate(self.member)
+        self.assertEqual(self.client.patch(url, {'name': 'Nueva'}, format='json').status_code, 403)
+        self.client.force_authenticate(self.admin)
+        self.admin.profile.is_active = False
+        self.admin.profile.save()
+        self.assertEqual(self.client.patch(url, {'name': 'Nueva'}, format='json').status_code, 403)
+        self.admin.profile.is_active = True
+        self.admin.profile.save()
+        self.assertEqual(self.client.patch(url, {'name': 'Nueva', 'parent': None}, format='json').status_code, 200)
+        self.folder.refresh_from_db()
+        self.assertEqual(self.folder.parent_id, self.root.pk)
+
     def test_zip_preserves_nested_folders_and_does_not_overwrite(self):
         self.client.force_authenticate(self.admin)
         path = 'Impor.Damian/Depositos/2026/Deposito.pdf'

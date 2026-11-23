@@ -100,8 +100,11 @@ class LibraryView(PrivateView):
         })
 
 
-class FolderInput(serializers.Serializer):
+class FolderNameInput(serializers.Serializer):
     name = serializers.CharField(max_length=120, validators=[clean_name])
+
+
+class FolderInput(FolderNameInput):
     parent = serializers.PrimaryKeyRelatedField(queryset=Folder.objects.all(), allow_null=True, required=False)
 
 
@@ -121,6 +124,24 @@ class FolderView(PrivateView):
         except IntegrityError:
             return Response({'detail': 'Ya existe una carpeta con ese nombre.'}, status=status.HTTP_409_CONFLICT)
         return Response({'id': folder.pk, 'name': folder.name}, status=status.HTTP_201_CREATED)
+
+
+class FolderDetailView(PrivateView):
+    permission_classes = [*PrivateView.permission_classes, ManageLibrary]
+
+    def patch(self, request, pk):
+        form = FolderNameInput(data=request.data)
+        form.is_valid(raise_exception=True)
+        name = clean_name(form.validated_data['name'])
+        try:
+            with transaction.atomic():
+                folder = get_object_or_404(Folder.objects.select_for_update(), pk=pk)
+                folder.name = name
+                folder.name_key = name.casefold()
+                folder.save(update_fields=['name', 'name_key'])
+        except IntegrityError:
+            return Response({'detail': 'Ya existe una carpeta con ese nombre.'}, status=status.HTTP_409_CONFLICT)
+        return Response({'id': folder.pk, 'name': folder.name})
 
 
 class UploadInput(serializers.Serializer):

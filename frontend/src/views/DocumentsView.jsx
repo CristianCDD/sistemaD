@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react'
-import { Archive, ChevronRight, Download, FileText, Folder, FolderOpen, FolderPlus, RefreshCw, Search, Upload, X } from 'lucide-react'
+import { Archive, ChevronRight, Download, FileText, Folder, FolderOpen, FolderPlus, Pencil, RefreshCw, Save, Search, Upload, X } from 'lucide-react'
 
 import Header from '../components/Header'
 import { api } from '../services/api'
@@ -33,9 +33,15 @@ export default function DocumentsView() {
   const [busy, setBusy] = useState('')
   const [folderName, setFolderName] = useState('')
   const [creating, setCreating] = useState(false)
+  const [renamingFolder, setRenamingFolder] = useState(null)
   const [selectedDocument, setSelectedDocument] = useState(null)
   const uploadInput = useRef(null)
   const zipInput = useRef(null)
+  const folderNameInput = useRef(null)
+
+  useEffect(() => {
+    if (creating) folderNameInput.current?.select()
+  }, [creating, renamingFolder])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -67,23 +73,46 @@ export default function DocumentsView() {
     setNotice('')
     setActionError('')
     setCreating(false)
+    setRenamingFolder(null)
     setFolderName('')
   }
 
-  async function createFolder(event) {
+  function startFolderEdit(item = null) {
+    setRenamingFolder(item)
+    setFolderName(item?.name || '')
+    setActionError('')
+    setNotice('')
+    setCreating(true)
+  }
+
+  function cancelFolderEdit() {
+    if (busy) return
+    setCreating(false)
+    setRenamingFolder(null)
+    setFolderName('')
+    setActionError('')
+  }
+
+  async function saveFolder(event) {
     event.preventDefault()
+    if (busy || !folderName.trim()) return
     setBusy('folder')
     setActionError('')
     setNotice('')
     try {
-      await api.post('/documentos/carpetas/', { name: folderName.trim(), parent: folder })
+      if (renamingFolder) {
+        await api.patch(`/documentos/carpetas/${renamingFolder.id}/`, { name: folderName.trim() })
+      } else {
+        await api.post('/documentos/carpetas/', { name: folderName.trim(), parent: folder })
+      }
       setCreating(false)
+      setRenamingFolder(null)
       setFolderName('')
       setQuery('')
-      setNotice('Carpeta creada.')
+      setNotice(renamingFolder ? 'Nombre actualizado.' : 'Carpeta creada.')
       reload()
     } catch (error) {
-      setActionError(errorMessage(error, 'No se pudo crear la carpeta.'))
+      setActionError(errorMessage(error, renamingFolder ? 'No se pudo renombrar la carpeta.' : 'No se pudo crear la carpeta.'))
     } finally {
       setBusy('')
     }
@@ -181,7 +210,7 @@ export default function DocumentsView() {
           <div className="documents-actions">
             {library?.can_manage && (
               <>
-                <button type="button" className="soft-button" disabled={loading || Boolean(busy) || Boolean(loadError)} onClick={() => setCreating(true)}>
+                <button type="button" className="soft-button" disabled={loading || Boolean(busy) || Boolean(loadError)} onClick={() => startFolderEdit()}>
                   <FolderPlus size={18} aria-hidden="true" /> Nueva carpeta
                 </button>
                 <button type="button" className="primary-button" disabled={loading || Boolean(busy) || Boolean(loadError)} onClick={() => uploadInput.current.click()}>
@@ -210,10 +239,10 @@ export default function DocumentsView() {
           </button>
         </div>
         {creating && (
-          <form className="documents-create" onSubmit={createFolder}>
-            <label>Nombre de la carpeta<input value={folderName} maxLength={120} onChange={(event) => setFolderName(event.target.value)} required autoFocus /></label>
-            <button type="submit" className="primary-button" disabled={!folderName.trim() || Boolean(busy)}>Crear</button>
-            <button type="button" className="icon-button" title="Cancelar" aria-label="Cancelar" disabled={Boolean(busy)} onClick={() => { setCreating(false); setActionError('') }}>
+          <form className="documents-create" aria-label={renamingFolder ? 'Renombrar carpeta' : 'Nueva carpeta'} onSubmit={saveFolder} onKeyDown={(event) => { if (event.key === 'Escape') cancelFolderEdit() }}>
+            <label>Nombre de la carpeta<input ref={folderNameInput} value={folderName} maxLength={120} disabled={Boolean(busy)} onChange={(event) => setFolderName(event.target.value)} required autoFocus /></label>
+            <button type="submit" className="primary-button" disabled={!folderName.trim() || Boolean(busy)}><Save size={17} aria-hidden="true" />{busy === 'folder' ? 'Guardando...' : renamingFolder ? 'Guardar' : 'Crear'}</button>
+            <button type="button" className="icon-button" title="Cancelar" aria-label="Cancelar" disabled={Boolean(busy)} onClick={cancelFolderEdit}>
               <X size={18} aria-hidden="true" />
             </button>
           </form>
@@ -230,7 +259,7 @@ export default function DocumentsView() {
                       {library.folders.map((item) => (
                         <tr key={`folder-${item.id}`}>
                           <th scope="row"><button className="documents-folder" disabled={Boolean(busy)} type="button" onClick={() => openFolder(item.id)}><Folder size={21} aria-hidden="true" /> <span>{item.name}</span></button></th>
-                          <td>—</td><td>—</td><td />
+                          <td>—</td><td>—</td><td>{library.can_manage && <button type="button" className="icon-button" title={`Renombrar ${item.name}`} aria-label={`Renombrar ${item.name}`} disabled={Boolean(busy)} onClick={() => startFolderEdit(item)}><Pencil size={17} aria-hidden="true" /></button>}</td>
                         </tr>
                       ))}
                       {library.documents.map((item) => (
